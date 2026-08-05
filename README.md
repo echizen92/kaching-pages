@@ -1,0 +1,76 @@
+# Kaching — Privacy Policy & Support Pages (GitHub Pages)
+
+This repo hosts the App Store Connect required URLs:
+
+| Page | File | URL (after deploy) |
+|---|---|---|
+| Privacy Policy | `index.html` | `https://<USERNAME>.github.io/kaching-pages/` |
+| Support | `support.html` | `https://<USERNAME>.github.io/kaching-pages/support.html` |
+
+## Before you push — email already set
+
+Contact email `faiz.rashid@gmx.us` is already baked into both pages.
+If you need to change it later:
+
+```bash
+# macOS (in-place replace, run from this repo root)
+sed -i '' 's/faiz.rashid@gmx.us/new@email.com/g' index.html support.html
+```
+
+## Push to GitHub (one-time setup)
+
+### Step 1 — create the repo on GitHub
+1. Go to https://github.com/new
+2. Repo name: `kaching-pages` (must be PUBLIC for free Pages)
+3. Click **Create repository** (do NOT check "Add a README" — we have files)
+
+### Step 2 — connect & push (run from this folder)
+```bash
+cd /Users/faiz/Projects/kaching-pages
+
+# If you haven't set git identity yet:
+git config --global user.name "Faiz Rashid"
+git config --global user.email "faiz.rashid@gmx.us"
+
+git init
+git add .
+git commit -m "Add privacy policy and support pages"
+git branch -M main
+git remote add origin https://github.com/<USERNAME>/kaching-pages.git
+git push -u origin main
+```
+
+### Step 3 — enable GitHub Pages
+1. GitHub → your `kaching-pages` repo → **Settings** → **Pages**
+2. Source: **Deploy from a branch** → branch `main` / root → **Save**
+3. Wait ~1 minute, then visit:
+   `https://<USERNAME>.github.io/kaching-pages/`
+   (and `/support.html`)
+
+## If you don't have GitHub
+
+Alternative free hosts (upload `index.html` + `support.html`):
+- **Netlify Drop**: https://app.netlify.com/drop — drag the two files in,
+  get `https://<random>.netlify.app` instantly (no account needed to start)
+- **Cloudflare Pages**: https://pages.cloudflare.com — drag & drop too
+
+Any of these give you a live HTTPS URL to paste into App Store Connect.
+
+## After both URLs are live
+
+Set them in **App Store Connect → My Apps → Kaching → App Information**:
+- Privacy Policy URL: `https://<USERNAME>.github.io/kaching-pages/`
+- Support URL: `https://<USERNAME>.github.io/kaching-pages/support.html`
+- Marketing URL: (optional — leave blank or point anywhere)
+
+## Update the artefact docs too
+
+After hosting, update these files in the Kaching repo:
+- `TestFlight_Submission/Metadata/App_Store_Connect_Metadata.md`
+- `TestFlight_Submission/Checklists/Submission_Notes.md`
+- `TestFlight_Submission/Signing/Signing_and_Build_Notes.md`
+
+...replacing the `your-domain.com` placeholders with the real URLs
+(note: those placeholders are in the Kaching repo's TestFlight_Submission
+docs and were already updated to the github.io format — just fill in
+<USERNAME> after the repo goes live).
