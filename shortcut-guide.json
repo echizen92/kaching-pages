@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "updated": "2026-09-02",
+  "guide": {
+    "quickAddTitle": "Quick add: get the pre-set shortcut",
+    "quickAddSubtitle": "Installs Log Transaction with Amount, Merchant & Card already wired — you still make the automation.",
+    "steps": {
+      "1": "Open the Kachingz app once after installing (this registers the action)",
+      "2": "Open Shortcuts → Automation tab → Create New Automation (the + icon only appears if you already have an automation)",
+      "3": "Scroll down and select Wallet → in the trigger options, App: Wallet (catches tap-to-pay AND online purchases)",
+      "4": "Select all Cards and Categories → do not filter any merchants → Select Run Immediately → Go next",
+      "5": "In the actions list, search \"Log Transaction\" → select Kachingz's action",
+      "6": "Automation tab → select the created automation → select \"Log Transaction\"",
+      "7": "Tap the Amount field → select Shortcut Input → tap it again → pick \"Amount\" (the transaction's price)",
+      "8": "Tap the Merchant field → select Shortcut Input → tap it again → pick \"Merchant\" (the store name)",
+      "9": "Tap the Card Name field → select Shortcut Input → tap it again → pick \"Card or Pass\" (the card used)",
+      "10": "Tap the tick (top right) to finish"
+    },
+    "step3iOS26": "Scroll down and select Wallet → Card: Any Card • Merchant: Any",
+    "fieldHint": "This picks the structured transaction fields — NOT the notification text. The \"Shortcut Input → tap it again\" step opens the transaction's sub-fields (Amount, Merchant, Card/Pass); selecting them directly is what makes every purchase log correctly, even when the notification preview is truncated.",
+    "fieldHintFallback": "If a field doesn't offer those sub-fields, you can also type the variable name: tap the field → search \"Amount\" → pick the transaction's Amount from the suggestions.",
+    "doneLine": "That's it — every purchase logs automatically, even with the phone locked. Make a purchase and the green banner above appears once it's verified."
+  }
+}
