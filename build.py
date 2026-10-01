@@ -15,7 +15,7 @@ UPDATED = "30 September 2026"
 # The front page is what App Store Connect's privacy URL points at until it is
 # changed to /privacy/. While False, the front page is the privacy policy and
 # the landing page is published at /home/ for review.
-LANDING_AT_ROOT = False
+LANDING_AT_ROOT = True
 
 APPLE = ('<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.37 12.62c-.03-2.6 2.12-3.85 2.22-3.91'
          '-1.21-1.77-3.09-2.01-3.76-2.04-1.6-.16-3.12.94-3.93.94-.81 0-2.06-.92-3.39-.89-1.74.03-3.35 1.01-4.25 '
@@ -361,3 +361,7 @@ if __name__ == "__main__":
     # Old addresses: App Store Connect and installed apps link to these.
     redirect("support.html", "support/")
     redirect("marketing.html", "./" if LANDING_AT_ROOT else "home/")
+    if LANDING_AT_ROOT:
+        # /home/ was the landing page's address before it moved to the front.
+        (ROOT / "home").mkdir(exist_ok=True)
+        redirect("home/index.html", "../")
