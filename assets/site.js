@@ -1,6 +1,6 @@
 // The landing page: live rooms (room.js), Mochi's speech, the day that runs as you scroll, the
 // playground, and the small demos. Everything works without it; it only adds the motion.
-import { Room, timeOfDay } from "./room.js?v=c366d5a6";
+import { Room, timeOfDay } from "./room.js?v=9084d336";
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];

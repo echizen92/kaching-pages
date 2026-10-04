@@ -236,7 +236,7 @@ export class Room {
     if (this.state.season !== "halloween" || !H || !image || !frame.meta.hat) return null;
     const anchor = frame.meta.hat[frame.index];
     if (!anchor) return null;
-    return { image, anchor, pivot: H.hat.pivot, scale: H.hat.cats[frame.cat].scale / H.hat.imageScale };
+    return { image, anchor, pivot: H.hat.pivot, brim: H.hat.brim, scale: H.hat.cats[frame.cat].scale / H.hat.imageScale };
   }
 
   /** One frame of a sheet, pinned at its feet, tinted, with a cast shadow made from the same frame.
@@ -262,7 +262,24 @@ export class Room {
       bc.save();
       bc.translate(pad + ax * k * u, pad + ay * k * u);
       bc.rotate(degrees * Math.PI / 180);
-      bc.drawImage(hat.image, -hat.pivot[0] * s, -hat.pivot[1] * s, hat.image.width * s, hat.image.height * s);
+      bc.scale(s, s);
+      bc.translate(-hat.pivot[0], -hat.pivot[1]);
+      // The hat is worn over the ears: whatever of the cat is above the brim's back edge is left out.
+      if (hat.brim) {
+        const [cx, cy, rx, ry] = hat.brim;
+        bc.beginPath();
+        bc.moveTo(cx - rx, cy - 20 * ry);
+        for (let i = 0; i <= 32; i++) {
+          const a = Math.PI * (1 - i / 32);
+          bc.lineTo(cx + rx * Math.cos(a), cy - ry * Math.sin(a) + 2);
+        }
+        bc.lineTo(cx + rx, cy - 20 * ry);
+        bc.closePath();
+        bc.globalCompositeOperation = "destination-out";
+        bc.fill();
+        bc.globalCompositeOperation = "source-over";
+      }
+      bc.drawImage(hat.image, 0, 0, hat.image.width, hat.image.height);
       bc.restore();
     }
     const sc = scratch.getContext("2d");

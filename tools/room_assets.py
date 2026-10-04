@@ -101,6 +101,7 @@ def main():
     webp(SRC / "halloween/hat.webp", OUT / "halloween/hat.webp", quality=90)
     hat = halloween["hat"]
     layout["halloween"] = {"decor": halloween["decor"], "hat": {"imageScale": hat["imageScale"], "pivot": hat["pivot"],
+                                                               "brim": hat["brim"],
                                                                "cats": {c: {"scale": v["scale"]} for c, v in hat["cats"].items()}}}
 
     for cat, base in (("tabby", SRC), ("tuxedo", SRC / "cats/tuxedo")):
