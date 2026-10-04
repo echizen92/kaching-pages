@@ -1,6 +1,6 @@
 // The landing page: live rooms (room.js), Mochi's speech, the day that runs as you scroll, the
 // playground, and the small demos. Everything works without it; it only adds the motion.
-import { Room, timeOfDay } from "./room.js?v=0b5ad59b";
+import { Room, timeOfDay } from "./room.js?v=c366d5a6";
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -36,6 +36,8 @@ const chip = $("[data-tod-chip]");
 chip.textContent = `${TOD[hero.state.time]} · your time`;
 const speech = $("[data-speech]");
 const lines = $$("[data-lines] li").map((li) => li.textContent);
+// October: the room's dressed for Halloween, and Mochi's in a witch hat.
+if (hero.state.season === "halloween") lines.unshift("It's Halloween month! Do you like my hat? The budgets aren't scary, I promise.");
 let line = 0, typing;
 function say(text) {
   clearInterval(typing);

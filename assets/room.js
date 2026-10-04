@@ -21,6 +21,11 @@ function image(path) {
 }
 const layout = () => (layoutPromise ??= fetch(new URL("layout.json", BASE)).then((r) => r.json()));
 
+/** October is Halloween, as in the app: decorations on the walls and a witch hat on the cat. */
+export function seasonAt(date = new Date()) {
+  return date.getMonth() === 9 ? "halloween" : null;
+}
+
 /** The time of day on the visitor's own clock, as the app works it out. */
 export function timeOfDay(date = new Date()) {
   const h = date.getHours() + date.getMinutes() / 60;
@@ -35,7 +40,7 @@ export class Room {
   constructor(canvas, state = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
-    this.state = { cat: "tabby", time: "day", weather: "clear", climate: "mild", pose: "idle", furniture: [], ...state };
+    this.state = { cat: "tabby", time: "day", weather: "clear", climate: "mild", pose: "idle", furniture: [], season: seasonAt(), ...state };
     this.scratch = document.createElement("canvas");
     this.clock = 0;
     this.clipStart = 0;
@@ -100,6 +105,7 @@ export class Room {
     if (s.climate === "hot") needs.push("weather/fan.webp");
     if (s.climate === "cold") needs.push("weather/heater.webp");
     for (const id of s.furniture) needs.push(`furniture/${id}-${s.time}.webp`);
+    if (s.season === "halloween" && this.L.halloween) needs.push(`halloween/decor-${s.time}.webp`, "halloween/hat.webp");
     const loaded = await Promise.all(needs.map(async (n) => [n, await image(n)]));
     this.img = { ...this.img, ...Object.fromEntries(loaded) };
   }
@@ -177,6 +183,9 @@ export class Room {
       if (!s.furniture.includes(piece.id) || piece.x == null) continue;
       ctx.drawImage(this.img[`furniture/${piece.id}-${s.time}.webp`], piece.x * u, piece.y * u, piece.w * u, piece.h * u);
     }
+    // October: a bat garland and a cobweb on the walls, a jack-o'-lantern on the bookshelf.
+    const decor = s.season === "halloween" && L.halloween && this.img[`halloween/decor-${s.time}.webp`];
+    if (decor) { const d = L.halloween.decor; ctx.drawImage(decor, d.x * u, d.y * u, d.w * u, d.h * u); }
 
     // Back to front by where each thing meets the floor.
     const items = [];
@@ -193,13 +202,13 @@ export class Room {
     }
     const f = this.frameNow();
     items.push([f.at.depth, () => {
-      this.sprite(this.img[`${f.cat}/${f.clip}.webp`], f.meta, f.index, f.at.x, f.at.y, k, u, light, true);
+      this.sprite(this.img[`${f.cat}/${f.clip}.webp`], f.meta, f.index, f.at.x, f.at.y, k, u, light, true, this.hat(f));
       // The outgoing frame fades over the new one, as in the app.
       const ghost = this.ghost;
       if (ghost && time - ghost.start < 0.16 && !REDUCE.matches) {
         ctx.globalAlpha = 1 - (time - ghost.start) / 0.16;
         const g = ghost.frame;
-        this.sprite(ghost.sheet, g.meta, g.index, g.at.x, g.at.y, k, u, light, false);
+        this.sprite(ghost.sheet, g.meta, g.index, g.at.x, g.at.y, k, u, light, false, this.hat(g));
         ctx.globalAlpha = 1;
       }
     }]);
@@ -220,27 +229,56 @@ export class Room {
     }
   }
 
-  /** One frame of a sheet, pinned at its feet, tinted, with a cast shadow made from the same frame. */
-  sprite(sheet, meta, index, x, y, k, u, tint, shadow) {
+  /** In October the cat wears its witch hat: where it sits on this frame, measured in the app's art. */
+  hat(frame) {
+    const H = this.L.halloween;
+    const image = this.img["halloween/hat.webp"];
+    if (this.state.season !== "halloween" || !H || !image || !frame.meta.hat) return null;
+    const anchor = frame.meta.hat[frame.index];
+    if (!anchor) return null;
+    return { image, anchor, pivot: H.hat.pivot, scale: H.hat.cats[frame.cat].scale / H.hat.imageScale };
+  }
+
+  /** One frame of a sheet, pinned at its feet, tinted, with a cast shadow made from the same frame.
+   *  A hat is painted onto the frame first, so it takes the same light and shadow. */
+  sprite(sheet, meta, index, x, y, k, u, tint, shadow, hat = null) {
     const { ctx } = this;
     const sx = (index % meta.cols) * meta.cw, sy = Math.floor(index / meta.cols) * meta.ch;
     const dw = meta.w * k * u, dh = meta.h * k * u;
+    // Room above and beside the frame for a hat, which rises above the ears.
+    const pad = hat ? Math.ceil(90 * k * u) : 0;
+    const sw = Math.ceil(dw) + 2 * pad, sh = Math.ceil(dh) + pad;
+    const base = this.base ??= document.createElement("canvas");
     const scratch = this.scratch;
-    const sw = Math.ceil(dw), sh = Math.ceil(dh);
-    if (scratch.width < sw || scratch.height < sh) { scratch.width = Math.max(scratch.width, sw); scratch.height = Math.max(scratch.height, sh); }
+    for (const c of [base, scratch]) {
+      if (c.width < sw || c.height < sh) { c.width = Math.max(c.width, sw); c.height = Math.max(c.height, sh); }
+    }
+    const bc = base.getContext("2d");
+    bc.clearRect(0, 0, sw, sh);
+    bc.drawImage(sheet, sx, sy, meta.cw, meta.ch, pad, pad, dw, dh);
+    if (hat) {
+      const [ax, ay, degrees] = hat.anchor;
+      const s = hat.scale * k * u;
+      bc.save();
+      bc.translate(pad + ax * k * u, pad + ay * k * u);
+      bc.rotate(degrees * Math.PI / 180);
+      bc.drawImage(hat.image, -hat.pivot[0] * s, -hat.pivot[1] * s, hat.image.width * s, hat.image.height * s);
+      bc.restore();
+    }
     const sc = scratch.getContext("2d");
     const paint = (fill) => {
       sc.globalCompositeOperation = "source-over";
       sc.clearRect(0, 0, scratch.width, scratch.height);
-      sc.drawImage(sheet, sx, sy, meta.cw, meta.ch, 0, 0, dw, dh);
+      sc.drawImage(base, 0, 0, sw, sh, 0, 0, sw, sh);
       if (fill) {
         sc.globalCompositeOperation = fill === "black" ? "source-in" : "multiply";
         sc.fillStyle = fill === "black" ? "#000" : `rgb(${fill.map((v) => v * 255).join(",")})`;
         sc.fillRect(0, 0, sw, sh);
-        if (fill !== "black") { sc.globalCompositeOperation = "destination-in"; sc.drawImage(sheet, sx, sy, meta.cw, meta.ch, 0, 0, dw, dh); }
+        if (fill !== "black") { sc.globalCompositeOperation = "destination-in"; sc.drawImage(base, 0, 0, sw, sh, 0, 0, sw, sh); }
         sc.globalCompositeOperation = "source-over";
       }
     };
+    const ox = -meta.fx * k * u - pad, oy = -meta.fy * k * u - pad;
     if (shadow) {
       paint("black");
       ctx.save();
@@ -249,11 +287,11 @@ export class Room {
       ctx.scale(1, 0.24);
       ctx.globalAlpha = 0.2;
       if ("filter" in ctx) ctx.filter = `blur(${2.5 * u}px)`;
-      ctx.drawImage(scratch, 0, 0, sw, sh, -meta.fx * k * u, -meta.fy * k * u, sw, sh);
+      ctx.drawImage(scratch, 0, 0, sw, sh, ox, oy, sw, sh);
       ctx.restore();
     }
     paint(tint);
-    ctx.drawImage(scratch, 0, 0, sw, sh, x * u - meta.fx * k * u, y * u - meta.fy * k * u, sw, sh);
+    ctx.drawImage(scratch, 0, 0, sw, sh, x * u + ox, y * u + oy, sw, sh);
   }
 
   glow(u, time) {

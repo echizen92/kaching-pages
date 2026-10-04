@@ -94,12 +94,27 @@ def main():
             appliances[name] = {**a, "cols": 1, "cw": a["w"], "ch": a["h"]}
     layout["weather"]["appliances"] = appliances
 
+    # October: the app's Halloween decorations and witch hat (tools/pet-sprites/halloween in the app repo).
+    halloween = json.loads((SRC / "halloween/halloween.json").read_text())
+    for t in TIMES:
+        webp(SRC / f"halloween/decor-{t}.webp", OUT / f"halloween/decor-{t}.webp", quality=88)
+    webp(SRC / "halloween/hat.webp", OUT / "halloween/hat.webp", quality=90)
+    hat = halloween["hat"]
+    layout["halloween"] = {"decor": halloween["decor"], "hat": {"imageScale": hat["imageScale"], "pivot": hat["pivot"],
+                                                               "cats": {c: {"scale": v["scale"]} for c, v in hat["cats"].items()}}}
+
     for cat, base in (("tabby", SRC), ("tuxedo", SRC / "cats/tuxedo")):
         clips = manifest["clips"] if cat == "tabby" else json.loads((base / "clips.json").read_text())
         layout["cats"][cat] = {}
         for clip in CLIPS:
             frames = sorted((base / clip).glob("*.webp"))
-            layout["cats"][cat][clip] = sheet(frames, clips[clip], CAT_SCALE, OUT / f"{cat}/{clip}.webp")
+            meta = sheet(frames, clips[clip], CAT_SCALE, OUT / f"{cat}/{clip}.webp")
+            # The hat's place per frame, moved into the cropped frame (same px as fx and fy).
+            anchors = hat["cats"][cat]["clips"].get(clip)
+            if anchors:
+                dx, dy = clips[clip]["fx"] - meta["fx"], clips[clip]["fy"] - meta["fy"]
+                meta["hat"] = [[round(x - dx, 1), round(y - dy, 1), t] for x, y, t in anchors]
+            layout["cats"][cat][clip] = meta
 
     (OUT / "layout.json").write_text(json.dumps(layout, separators=(",", ":")))
     total = sum(p.stat().st_size for p in OUT.rglob("*") if p.is_file())
