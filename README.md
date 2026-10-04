@@ -87,3 +87,23 @@ page (`LANDING_AT_ROOT = True`); `/home/` redirects to it.
 
 The app downloads companion-content.json, prompt-overlay.json and
 shortcut-guide.json from here — keep their names and shapes.
+
+## The landing page (redesigned 4 Oct 2026)
+
+The front page is built around a live room: `assets/room.js` draws the app's own room art in a canvas
+the way the app's `MochiRoomView` does (time of day, weather on the glass, fan and heater, furniture,
+both cats' animation loops), and `assets/site.js` runs the page: Mochi's speech, "A day with Mochi"
+(the room and page colour follow dawn, day, dusk and night as you scroll), the "Make it yours"
+playground and the small demos. Without JavaScript the page still reads; with Reduce Motion the
+rooms hold still.
+
+- **Room art** comes from the app: `python3 tools/room_assets.py` packs
+  `../Kaching/versions/v1.1/Kaching/Resources/Mochi` into `assets/room/` (sprite sheets plus
+  `layout.json`). Re-run it when the app's room art changes.
+- **UI pieces** in `assets/ui/` are crops of the App Store captures
+  (`../Kaching/design/app-store/source/raw/`); the story's app cards are HTML.
+- **Share image** `assets/og.jpg` is a render of the hero (Playwright, 1200 × 630).
+- **Preview**: `python3 build.py`, then `python3 -m http.server 4173` and open http://localhost:4173.
+  `build.py` stamps content hashes on the CSS and JS links, so a deploy is never served stale.
+- Fonts: Fraunces and Instrument Sans, self-hosted in `assets/fonts/` (latin and latin-ext subsets,
+  SIL Open Font License, licences alongside), so the site makes no third-party requests.

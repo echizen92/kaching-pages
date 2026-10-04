@@ -5,6 +5,8 @@ Every link is relative, so the same files work at echizen92.github.io/kaching-pa
 and at kachingz.com. The JSON files the app downloads (companion-content.json,
 prompt-overlay.json, shortcut-guide.json) are not touched by this script.
 """
+import hashlib
+import re
 import pathlib
 
 ROOT = pathlib.Path(__file__).parent
@@ -24,15 +26,31 @@ APPLE = ('<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.37 12.62c-.03
          '.71-.86 1.19-2.06 1.06-3.25-1.02.04-2.26.68-3 1.54-.66.76-1.23 1.98-1.08 3.15 1.14.09 2.3-.58 3.02-1.44z"/></svg>')
 
 
-def page(path, title, description, body, current=""):
+# Self-hosted (assets/fonts), so visitors' browsers make no requests to Google.
+FONTS = ('<link rel="preload" href="{up}assets/fonts/fraunces-normal-latin.woff2" as="font" type="font/woff2" crossorigin>\n'
+         '<link rel="preload" href="{up}assets/fonts/instrument-sans-normal-latin.woff2" as="font" type="font/woff2" crossorigin>')
+
+
+def version(asset):
+    """A short content hash, so browsers and GitHub Pages' cache pick up changed files at once."""
+    return hashlib.sha1((ROOT / asset).read_bytes()).hexdigest()[:8]
+
+
+def store_button(extra=""):
+    return (f'<a class="btn{extra}" href="{APP_STORE}">{APPLE}<span><small>Download on the</small>App Store</span></a>')
+
+
+def page(path, title, description, body, current="", landing=False):
     depth = path.count("/") + 1 if path else 0
     up = "../" * depth
-    nav = [("", "Home"), ("privacy/", "Privacy"), ("support/", "Support"), ("your-data/", "Your data")]
-    links = "".join(
-        f'<a href="{up}{href}"{" aria-current=page" if href == current else ""}'
-        f'{" class=hide-sm" if href == "your-data/" else ""}>{label}</a>'
-        for href, label in nav[1:])
+    home = up or "./"
+    nav = (f'<a href="{home}#day">How it works</a>'
+           f'<a href="{up}privacy/"{" aria-current=page" if current == "privacy/" else ""}>Privacy</a>'
+           f'<a href="{up}support/"{" aria-current=page" if current == "support/" else ""}>Support</a>'
+           f'<a class="pill" href="{APP_STORE}">Get the app</a>')
     body = body.replace("{UP}", up)
+    script = f'\n<script type="module" src="{up}assets/site.js?v={version("assets/site.js")}"></script>' if landing else ""
+    preload = f'\n<link rel="preload" href="{up}assets/room/layout.json" as="fetch" crossorigin>' if landing else ""
     html = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -40,29 +58,35 @@ def page(path, title, description, body, current=""):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <meta name="description" content="{description}">
+<meta name="theme-color" content="#FBF3E8">
 <meta name="apple-itunes-app" content="app-id=6798360020">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{description}">
-<meta property="og:image" content="{up}assets/01-home.jpg">
+<meta property="og:image" content="https://kachingz.com/assets/og.jpg">
 <link rel="icon" href="{up}assets/favicon.png">
 <link rel="apple-touch-icon" href="{up}assets/apple-touch-icon.png">
-<link rel="stylesheet" href="{up}assets/site.css">
+{FONTS.replace('{up}', up)}
+<link rel="stylesheet" href="{up}assets/site.css?v={version("assets/site.css")}">{preload}{script}
 </head>
-<body>
+<body class="{'landing' if landing else 'doc-page'}">
+<a class="skip" href="#main">Skip to content</a>
 <header class="top"><div class="wrap">
-  <a class="brand" href="{up or './'}"><img src="{up}assets/icon.png" alt="">Kachingz</a>
-  <nav>{links}</nav>
+  <a class="brand" href="{home}"><img src="{up}assets/icon.png" alt="" width="34" height="34">Kachingz</a>
+  <nav aria-label="Main">{nav}</nav>
 </div></header>
-<main>
+<main id="main">
 {body}
 </main>
 <footer><div class="wrap">
-  <a href="{up}privacy/">Privacy Policy</a>
-  <a href="{up}terms/">Terms of Use</a>
-  <a href="{up}support/">Support</a>
-  <a href="{up}your-data/">Your data</a>
-  <a href="mailto:{EMAIL}">{EMAIL}</a>
-  <span class="copy">© 2026 Kachingz. Kachingz is not a bank and does not move money.</span>
+  <a class="brand" href="{home}"><img src="{up}assets/icon.png" alt="" width="34" height="34">Kachingz</a>
+  <nav aria-label="Footer">
+    <a href="{up}privacy/">Privacy Policy</a>
+    <a href="{up}terms/">Terms of Use</a>
+    <a href="{up}support/">Support</a>
+    <a href="{up}your-data/">Your data</a>
+    <a href="mailto:{EMAIL}">{EMAIL}</a>
+  </nav>
+  <p class="copy">© 2026 Kachingz. Kachingz is not a bank and does not move money. Apple, the Apple logo, Apple Pay and Apple Wallet are trademarks of Apple Inc.</p>
 </div></footer>
 </body>
 </html>
@@ -88,78 +112,200 @@ def redirect(filename, target):
 HOME = f"""
 <section class="hero"><div class="wrap">
   <div>
-    <div class="eyebrow">Budget &amp; expense tracker for iPhone</div>
-    <h1>Know what<br>you can <em>spend.</em></h1>
-    <p class="lede">Budgets, bills and spending in one calm place, with an AI money coach and a cat who grows with your habits. No bank login.</p>
-    <div class="cta">
-      <a class="btn" href="{APP_STORE}">{APPLE} Download on the App Store</a>
-      <a class="btn ghost" href="{{UP}}privacy/">How we handle your data</a>
-    </div>
-    <p class="note">Free to download. Optional Kachingz Pro subscription.</p>
+    <div class="eyebrow fade-in" style="animation-delay:.05s">Budget &amp; expense tracker for iPhone</div>
+    <h1><span class="w" style="--i:0">The</span> <span class="w" style="--i:1">budget</span> <span class="w" style="--i:2">app</span> <span class="w" style="--i:3">with</span> <span class="w" style="--i:4">a</span> <span class="w" style="--i:5"><em>cat</em></span> <span class="w" style="--i:6">in</span> <span class="w" style="--i:7">it.</span></h1>
+    <p class="lede fade-in">See what you can really spend after bills and savings. Purchases log themselves when you tap to pay. And on Home, a cosy room where your cat keeps count with you.</p>
+    <div class="cta fade-in">{store_button()}<a class="link-arrow" href="#day">Spend a day with Mochi</a></div>
+    <ul class="trust fade-in"><li>No bank login</li><li>No ads or tracking</li><li>Records stay on your iPhone</li></ul>
   </div>
-  <img class="phone" src="{{UP}}assets/01-home.jpg" alt="Kachingz home screen showing Available to spend of S$11,773.57 after bills and savings, with Mochi the cat in her room" width="560" height="1217">
+  <div class="stage fade-in" style="animation-delay:.35s">
+    <div class="roomcard">
+      <canvas data-room='{{"time":"auto","pose":"idle"}}' data-hero role="img" aria-label="Mochi, an orange tabby cat, in a cosy room. Select Mochi for a cuddle."></canvas>
+      <span class="chip left" data-tod-chip>Day · your time</span>
+      <span class="chip right" aria-hidden="true">Tap Mochi</span>
+      <div class="speech">
+        <span class="name">Mochi</span><span class="hearts" aria-label="Friendship: 3 of 4 hearts">♥♥♥♡</span>
+        <p data-speech>You have S$1,284 to spend till payday, with bills and savings already tucked away.</p>
+        <ul hidden data-lines>
+          <li>You have S$1,284 to spend till payday, with bills and savings already tucked away.</li>
+          <li>Your phone bill is due Thursday. I've already set S$38 aside for it.</li>
+          <li>Seven days of logging in a row! That's a new record for us.</li>
+          <li>Food is at 80% of its budget with 9 days to go. Cook tonight?</li>
+          <li>Payday's on Friday. Three more sleeps!</li>
+        </ul>
+        <div class="hint">Mochi talks about your own money</div>
+      </div>
+    </div>
+  </div>
 </div></section>
 
-<div class="promises"><div class="wrap">
-  <div><b>No bank login</b><span>You choose what's recorded.</span></div>
-  <div><b>On your iPhone</b><span>Records stay on your device.</span></div>
-  <div><b>No ads, no tracking</b><span>No analytics or ad SDKs.</span></div>
-  <div><b>Hide amounts</b><span>One tap masks every figure.</span></div>
+<div class="marquee" aria-hidden="true"><div class="track">
+  <span>Know what you can spend</span><span>Purchases that log themselves</span><span>Bills before they bite</span><span>A tabby or a tuxedo</span><span>No bank login</span><span>Your weather in the window</span>
+  <span>Know what you can spend</span><span>Purchases that log themselves</span><span>Bills before they bite</span><span>A tabby or a tuxedo</span><span>No bank login</span><span>Your weather in the window</span>
 </div></div>
 
-<section class="feature"><div class="wrap">
-  <div>
-    <h2>Tap to pay.<br>It <em>logs itself.</em></h2>
-    <p>Set up an Apple Wallet automation once and purchases land in Kachingz as you pay, with the merchant, amount and card.</p>
-    <p>Prefer to type? Adding a purchase takes a few seconds, and Undo is always there.</p>
+<section class="day" id="day" data-time="dawn">
+  <div class="intro wrap">
+    <div class="eyebrow" data-reveal>A day with Mochi</div>
+    <h2 data-reveal>From <em>sunrise</em> to bedtime.</h2>
+    <p data-reveal style="--d:.1s">Kachingz keeps the numbers; Mochi keeps you company. Here's how a day goes.</p>
   </div>
-  <img class="phone" src="{{UP}}assets/02-autolog.jpg" alt="Transactions logged automatically from Apple Wallet" loading="lazy" width="560" height="1217">
+  <div class="wrap split">
+    <div class="sticky"><div class="stage"><div class="roomcard bare">
+      <canvas data-room='{{"time":"dawn","pose":"idle"}}' data-story role="img" aria-label="Mochi's room, changing with the time of day as you read."></canvas>
+      <span class="chip left" data-story-chip>Dawn</span>
+    </div></div></div>
+    <div class="chapters">
+      <article class="chapter" data-chapter='{{"time":"dawn","pose":"idle","furniture":[]}}'>
+        <div class="time">07:02</div><div class="when">Dawn</div>
+        <div class="chapter-body"><h3>Wake up to one number.</h3>
+        <p>Available to spend is your balance minus the bills due before payday and the money you've set aside. It answers "can I?" before the coffee's made.</p></div>
+        <div class="ui">
+          <div class="card"><div class="label">Available to spend</div><div class="big" data-count="1284.60">S$1,284.60</div><div class="label">After bills &amp; savings · payday in 3 days</div></div>
+          <div class="card" style="margin-top:10px">
+            <div class="row"><span>Tracked balance</span><span class="amt">S$1,883.97</span></div>
+            <div class="row"><span>Bills reserved</span><span class="amt">−S$399.37</span></div>
+            <div class="row"><span>Set aside</span><span class="amt">−S$200.00</span></div>
+          </div>
+        </div>
+      </article>
+      <article class="chapter" data-chapter='{{"time":"day","pose":"sit","furniture":[]}}'>
+        <div class="time">12:41</div><div class="when">Lunchtime</div>
+        <div class="chapter-body"><h3>Tap to pay. It logs itself.</h3>
+        <p>Set up an Apple Wallet automation once, and every purchase lands in Kachingz with the merchant, amount and card. Prefer to type? Adding one takes seconds.</p></div>
+        <div class="ui">
+          <div class="notif"><div class="app" aria-hidden="true">💳</div><div style="flex:1"><div class="meta"><b>Wallet</b><span>now</span></div><b>Coffee shop</b><div>S$5.40 with your card</div></div></div>
+          <div class="card logged">
+            <div class="row"><div class="lead"><div class="icon" style="background:#FDEBD8" aria-hidden="true">☕</div><div><b>Coffee shop</b><span class="muted">Food &amp; drinks · 12:41</span></div></div><span class="amt">−S$5.40</span></div>
+            <div class="row"><span class="tag">✓ Logged automatically</span><span class="label">Undo</span></div>
+          </div>
+        </div>
+      </article>
+      <article class="chapter" data-chapter='{{"time":"dusk","pose":"idle","furniture":[]}}'>
+        <div class="time">18:15</div><div class="when">Dusk</div>
+        <div class="chapter-body"><h3>Bills, before they bite.</h3>
+        <p>Bills and subscriptions sit in one list. What's due before payday is set aside for you, and Mochi mentions what's coming up.</p></div>
+        <div class="ui">
+          <div class="card"><div class="label">Reserved before payday</div><div class="big" data-count="399.37">S$399.37</div><div class="label">4 bills due</div></div>
+          <div class="card" style="margin-top:10px">
+            <div class="row"><div class="lead"><div class="icon" style="background:#E3ECF7" aria-hidden="true">📱</div><div><b>Phone plan</b><span class="muted">Due Thursday</span></div></div><span class="amt">S$38.00</span></div>
+            <div class="row"><div class="lead"><div class="icon" style="background:#FFF3D6" aria-hidden="true">⚡</div><div><b>Electricity</b><span class="muted">Due Friday</span></div></div><span class="amt">S$112.40</span></div>
+            <div class="row"><div class="lead"><div class="icon" style="background:#E6F1E8" aria-hidden="true">🛡️</div><div><b>Insurance</b><span class="muted">Due Friday</span></div></div><span class="amt">S$238.99</span></div>
+            <div class="row"><div class="lead"><div class="icon" style="background:#F1E6F7" aria-hidden="true">🎵</div><div><b>Music</b><span class="muted">Renews Saturday</span></div></div><span class="amt">S$9.98</span></div>
+          </div>
+        </div>
+      </article>
+      <article class="chapter" data-chapter='{{"time":"night","pose":"sleep","furniture":["lights"]}}'>
+        <div class="time">23:30</div><div class="when">Bedtime</div>
+        <div class="chapter-body"><h3>Under budget. Sleep easy.</h3>
+        <p>Budgets by category show what's left and whether you're on pace, not just what's gone.</p></div>
+        <div class="ui">
+          <div class="card" style="background:#E6EEE2"><div class="big" style="font-size:28px">S$462.50 left</div><div class="label">On pace · 12 days left</div></div>
+          <div class="card" style="margin-top:10px">
+            <div class="row" style="display:block"><div style="display:flex;justify-content:space-between"><b>Food &amp; drinks</b><span class="amt">S$212.40 left</span></div><div class="bar"><i style="--w:58%"></i></div></div>
+            <div class="row" style="display:block"><div style="display:flex;justify-content:space-between"><b>Transport</b><span class="amt">S$64.00 left</span></div><div class="bar"><i style="--w:70%"></i></div></div>
+            <div class="row" style="display:block"><div style="display:flex;justify-content:space-between"><b>Shopping</b><span class="amt">S$140.00 left</span></div><div class="bar"><i style="--w:30%"></i></div></div>
+            <div class="row" style="display:block"><div style="display:flex;justify-content:space-between"><b>Fun</b><span class="amt">S$46.10 left</span></div><div class="bar"><i style="--w:81%"></i></div></div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="yours" id="yours">
+  <div class="intro wrap">
+    <span class="pro-tag" data-reveal>Kachingz Pro</span>
+    <h2 data-reveal>Make the room <em>yours.</em></h2>
+    <p data-reveal style="--d:.1s">Pick your cat, bring in the weather, and decorate with paws you earn from good money habits. Go on, try it.</p>
+  </div>
+  <div class="wrap split">
+    <div class="stage" data-reveal><div class="roomcard bare">
+      <canvas data-room='{{"time":"day","pose":"sit"}}' data-play role="img" aria-label="Mochi's room, showing the choices you make on the right."></canvas>
+      <span class="chip left" data-play-chip>Day · clear</span>
+    </div></div>
+    <div class="controls" data-reveal style="--d:.15s">
+      <div class="control"><h4 id="c-cat">Cat</h4><div class="seg" data-set="cat" role="group" aria-labelledby="c-cat">
+        <button type="button" value="tabby" aria-pressed="true">Orange tabby</button><button type="button" value="tuxedo" aria-pressed="false">Tuxedo</button></div></div>
+      <div class="control"><h4 id="c-time">Time of day</h4><div class="seg" data-set="time" role="group" aria-labelledby="c-time">
+        <button type="button" value="dawn" aria-pressed="false">Dawn</button><button type="button" value="day" aria-pressed="true">Day</button><button type="button" value="dusk" aria-pressed="false">Dusk</button><button type="button" value="night" aria-pressed="false">Night</button></div></div>
+      <div class="control"><h4 id="c-weather">Weather</h4><div class="seg" data-set="weather" role="group" aria-labelledby="c-weather">
+        <button type="button" value="clear" aria-pressed="true">Clear</button><button type="button" value="cloudy" aria-pressed="false">Cloudy</button><button type="button" value="rain" aria-pressed="false">Rain</button><button type="button" value="storm" aria-pressed="false">Storm</button><button type="button" value="snow" aria-pressed="false">Snow</button></div></div>
+      <div class="control"><h4 id="c-temp">Temperature</h4><div class="seg" data-set="climate" role="group" aria-labelledby="c-temp">
+        <button type="button" value="mild" aria-pressed="true">Mild</button><button type="button" value="hot" aria-pressed="false">Hot day</button><button type="button" value="cold" aria-pressed="false">Cold day</button></div></div>
+      <div class="control"><h4 id="c-deco">Decorate</h4><div class="seg" data-toggle="furniture" role="group" aria-labelledby="c-deco">
+        <button type="button" value="lights" aria-pressed="false">Fairy lights <span class="paws">40 paws</span></button><button type="button" value="shelf" aria-pressed="false">Wall shelf <span class="paws">30</span></button><button type="button" value="piggy" aria-pressed="false">Piggy bank <span class="paws">25</span></button><button type="button" value="heartrug" aria-pressed="false">Heart rug <span class="paws">60</span></button><button type="button" value="cushion" aria-pressed="false">Floor cushion <span class="paws">35</span></button></div></div>
+      <p class="caption" data-caption aria-live="polite">Every action is a moment with Mochi. Nothing drains or decays.</p>
+    </div>
+  </div>
+</section>
+
+<section class="rest">
+  <div class="intro wrap" style="padding-top:0">
+    <div class="eyebrow" data-reveal>And the rest</div>
+    <h2 data-reveal>Everything else, <em>done properly.</em></h2>
+  </div>
+  <div class="wrap"><div class="bento">
+    <div class="tile ai" data-reveal>
+      <h3>Advice from your own numbers.</h3>
+      <p>Weekly reviews, budget suggestions and month-end projections, worked out from what you've recorded. Ten reports free; unlimited with Pro. Suggestions are informational, not financial advice.</p>
+      <div class="shot"><img src="{{UP}}assets/ui/insights.webp" alt="Insights: S$205.56 spent this week so far, 13% less than the same point last week, with a chart by day" width="900" height="1016" loading="lazy"></div>
+    </div>
+    <div class="tile travel" data-reveal style="--d:.08s">
+      <h3>Travel without the maths.</h3>
+      <p>Spend in ringgit, yen or baht and see it in your home currency at the day's rate, with the original kept.</p>
+      <div class="fx" aria-live="off"><span class="from"><span class="swap" data-fx-from>MYR 42.50</span></span><span class="swap" data-fx-to>S$13.30</span></div>
+    </div>
+    <div class="tile hide" data-reveal style="--d:.16s">
+      <h3>Hide every amount.</h3>
+      <p>One tap masks every figure, for when someone's reading over your shoulder.</p>
+      <div class="mask"><span class="val" data-mask-val>S$5,234.24</span><button type="button" data-mask aria-pressed="false" aria-label="Hide amounts">👁</button></div>
+    </div>
+    <div class="tile add" data-reveal>
+      <h3>Logged in seconds.</h3>
+      <p>Amount, merchant, done. Undo is always there if you slip.</p>
+      <div class="shot"><img src="{{UP}}assets/ui/add.webp" alt="Add Transaction: S$18.50 at Coffee shop for toast and coffee" width="900" height="1031" loading="lazy"></div>
+    </div>
+    <div class="tile cards" data-reveal style="--d:.08s">
+      <h3>Cards and pay-later, sorted.</h3>
+      <p>Track credit, debit and buy-now-pay-later accounts. Card repayments are kept apart from your spending.</p>
+      <div class="cardstack" aria-hidden="true"><div>Debit<span>•••• 4021</span></div><div>Credit<span>•••• 7781</span></div><div>Pay later<span>3 of 4 paid</span></div></div>
+    </div>
+  </div></div>
+</section>
+
+<section class="promise"><div class="wrap">
+  <div class="eyebrow" data-reveal>What Kachingz doesn't do</div>
+  <ul>
+    <li data-reveal>No bank <em>login.</em></li>
+    <li data-reveal>No account to make.</li>
+    <li data-reveal>No ads. No <em>tracking.</em></li>
+    <li data-reveal>Records stay on your <em>iPhone.</em></li>
+  </ul>
+  <p data-reveal>Kachingz never connects to your bank or moves money. When you ask for an AI report, a summary of the figures it needs is sent to write it, and our server doesn't keep it. <a href="{{UP}}privacy/">Read the privacy policy</a>.</p>
 </div></section>
 
-<section class="feature flip"><div class="wrap">
-  <div>
-    <h2>See what's left<br>in every <em>budget.</em></h2>
-    <p>Set monthly or weekly budgets by category and see whether you're on pace, not just how much is gone.</p>
+<section class="price"><div class="wrap">
+  <div class="intro" style="padding:0">
+    <div class="eyebrow" data-reveal>Pricing</div>
+    <h2 data-reveal>Free to start. <em>Pro</em> for the cat.</h2>
   </div>
-  <img class="phone" src="{{UP}}assets/04-budgets.jpg" alt="Budgets screen showing S$2,479.86 left and comfortably ahead of pace" loading="lazy" width="560" height="1217">
-</div></section>
-
-<section class="feature"><div class="wrap">
-  <div>
-    <h2>Advice from<br><em>your own</em> numbers.</h2>
-    <p>AI reports review your budgets, bills, cards and habits and suggest one practical next step. Suggestions are informational, not financial advice.</p>
+  <div class="plans">
+    <div class="plan" data-reveal><h3>Free</h3><p class="sub">Everything you need to keep count.</p><ul>
+      <li>Available to spend, after bills and savings</li><li>Budgets, bills, subscriptions and cards</li><li>Purchases logged from Apple Wallet</li><li>Travel currency conversion</li><li>10 AI reports</li></ul></div>
+    <div class="plan pro" data-reveal style="--d:.1s"><h3>Kachingz Pro</h3><p class="sub">Monthly or yearly. Prices are shown in the app.</p><ul>
+      <li>Everything in Free</li><li>Mochi's room, with a tabby or a tuxedo</li><li>Decorating with paws you earn</li><li>Your weather in the window</li><li>Unlimited AI reports, ready each morning</li></ul></div>
   </div>
-  <img class="phone" src="{{UP}}assets/05-ai.jpg" alt="AI reports including a next-month budget advisor and spending review" loading="lazy" width="560" height="1217">
-</div></section>
-
-<section class="feature peach flip"><div class="wrap">
-  <div>
-    <h2>Bills, without<br>the <em>surprises.</em></h2>
-    <p>Keep bills and subscriptions together, see what's due before payday, and track credit, debit and pay-later cards.</p>
-  </div>
-  <img class="phone" src="{{UP}}assets/06-bills.jpg" alt="Bills and subscriptions with amounts due" loading="lazy" width="560" height="1217">
-</div></section>
-
-<section class="feature"><div class="wrap">
-  <div>
-    <h2>Travelling?<br>It <em>converts.</em></h2>
-    <p>Spend in ringgit, yen or baht and see it in your home currency at the day's exchange rate, with the original amount kept beneath.</p>
-  </div>
-  <img class="phone" src="{{UP}}assets/07-overseas.jpg" alt="An overseas purchase of MYR 42.50 converted to S$13.30" loading="lazy" width="560" height="1217">
-</div></section>
-
-<section class="feature dark flip"><div class="wrap">
-  <div>
-    <h2>Small habits.<br>A <em>happy cat.</em></h2>
-    <p>Log, save and check in, and Mochi grows with you in her cosy room.</p>
-  </div>
-  <img class="phone" src="{{UP}}assets/08-room.jpg" alt="Mochi the cat in her room" loading="lazy" width="560" height="1217">
+  <p class="fine">Subscriptions renew automatically unless cancelled at least 24 hours before the period ends. Manage them in your App Store account.</p>
 </div></section>
 
 <section class="closing"><div class="wrap">
-  <h2>Money that <em>makes sense.</em></h2>
-  <p>Free to download, with 10 AI reports included. Kachingz Pro adds unlimited reports and the full companion.</p>
-  <div class="cta"><a class="btn" href="{APP_STORE}">{APPLE} Download on the App Store</a></div>
+  <h2 data-reveal>Sleep easy about <em>money.</em></h2>
+  <p data-reveal style="--d:.08s">Free on the App Store, for iPhone.</p>
+  <div data-reveal style="--d:.16s">{store_button()}</div>
+  <div class="stage" data-reveal><div class="roomcard bare">
+    <canvas data-room='{{"time":"night","pose":"sleep","furniture":["lights","heartrug"]}}' role="img" aria-label="Mochi asleep on the bed at night, under fairy lights."></canvas>
+  </div></div>
 </div></section>
 """
 
@@ -338,9 +484,12 @@ NOT_FOUND = """
 """
 
 if __name__ == "__main__":
-    page("" if LANDING_AT_ROOT else "home", "Kachingz: Budget & Expense Tracker for iPhone",
-         "Know what you can spend. Budgets, bills and spending in one place, with an AI money coach and a cat who grows with your habits. No bank login.",
-         HOME)
+    # site.js imports room.js; stamp its version so a changed room.js isn't served from cache.
+    site_js = ROOT / "assets/site.js"
+    site_js.write_text(re.sub(r'"\./room\.js(\?v=[0-9a-f]+)?"', f'"./room.js?v={version("assets/room.js")}"', site_js.read_text()))
+    page("" if LANDING_AT_ROOT else "home", "Kachingz: the budget app with a cat in it",
+         "See what you can really spend after bills and savings, log Apple Pay purchases automatically, and keep a cosy room where your cat keeps count with you. No bank login.",
+         HOME, landing=True)
     if not LANDING_AT_ROOT:
         page("", "Privacy Policy · Kachingz",
              "How Kachingz handles your information: records stay on your iPhone, no bank login, no ads or tracking.",
