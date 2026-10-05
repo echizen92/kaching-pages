@@ -21,8 +21,9 @@ function image(path) {
 }
 const layout = () => (layoutPromise ??= fetch(new URL("layout.json", BASE)).then((r) => r.json()));
 
-// The seasons, as in the app (MochiSeason): each festival's days every year, Singapore's only for
-// visitors on Singapore time. In priority order: the shorter festival wins where two overlap.
+// The seasons, as in the app (MochiSeason): each festival's days every year, Singapore's for visitors
+// on Singapore (and, for the ones it shares, Malaysia) time. In priority order: the shorter festival
+// wins where two overlap.
 const MOON = {
   deepavali: { 2026: [11, 8], 2027: [10, 28], 2028: [10, 17], 2029: [11, 5], 2030: [10, 26] },
   hariRaya: { 2026: [3, 21], 2027: [3, 10], 2028: [2, 27], 2029: [2, 14], 2030: [2, 4] },
@@ -36,26 +37,31 @@ function easter(y) {
   return [Math.floor((h + l - 7 * m + 114) / 31), ((h + l - 7 * m + 114) % 31) + 1];
 }
 const SEASONS = [
-  ["deepavali", true, (y) => MOON.deepavali[y], 6, 1],
-  ["hariRaya", true, (y) => MOON.hariRaya[y], 6, 6],
-  ["lunarNewYear", true, (y) => MOON.lunarNewYear[y], 7, 14],
-  ["midAutumn", true, (y) => MOON.midAutumn[y], 7, 1],
-  ["nationalDay", true, () => [8, 9], 8, 0],
-  ["easter", false, easter, 7, 1],
-  ["valentines", false, () => [2, 14], 4, 0],
-  ["newYear", false, () => [12, 31], 3, 3],
-  ["christmas", false, () => [12, 25], 24, 2],
-  ["halloween", false, () => [10, 31], 30, 0],
+  ["deepavali", ["SG", "MY"], (y) => MOON.deepavali[y], 6, 1],
+  ["hariRaya", ["SG", "MY"], (y) => MOON.hariRaya[y], 6, 6],
+  ["lunarNewYear", ["SG", "MY"], (y) => MOON.lunarNewYear[y], 7, 14],
+  ["midAutumn", ["SG", "MY"], (y) => MOON.midAutumn[y], 7, 1],
+  ["nationalDay", ["SG"], () => [8, 9], 8, 0],
+  ["easter", null, easter, 7, 1],
+  ["valentines", null, () => [2, 14], 4, 0],
+  ["newYear", null, () => [12, 31], 3, 3],
+  ["christmas", null, () => [12, 25], 24, 2],
+  ["halloween", null, () => [10, 31], 30, 0],
 ];
-const inSingapore = () => {
-  try { return Intl.DateTimeFormat().resolvedOptions().timeZone === "Asia/Singapore"; } catch { return false; }
+/** The visitor's country from their time zone: Singapore's festivals are for Singapore, and the ones
+ *  Malaysia shares for Malaysia too. */
+const visitorRegion = () => {
+  try {
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return zone === "Asia/Singapore" ? "SG" : ["Asia/Kuala_Lumpur", "Asia/Kuching"].includes(zone) ? "MY" : null;
+  } catch { return null; }
 };
 
 /** The season the room is dressed for on the visitor's own date, or null. */
-export function seasonAt(date = new Date(), singapore = inSingapore()) {
+export function seasonAt(date = new Date(), region = visitorRegion()) {
   const today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  for (const [name, sgOnly, day, before, after] of SEASONS) {
-    if (sgOnly && !singapore) continue;
+  for (const [name, regions, day, before, after] of SEASONS) {
+    if (regions && !regions.includes(region)) continue;
     for (const y of [today.getFullYear() - 1, today.getFullYear(), today.getFullYear() + 1]) {
       const d = day(y);
       if (!d) continue;
