@@ -21,9 +21,49 @@ function image(path) {
 }
 const layout = () => (layoutPromise ??= fetch(new URL("layout.json", BASE)).then((r) => r.json()));
 
-/** October is Halloween, as in the app: decorations on the walls and a witch hat on the cat. */
-export function seasonAt(date = new Date()) {
-  return date.getMonth() === 9 ? "halloween" : null;
+// The seasons, as in the app (MochiSeason): each festival's days every year, Singapore's only for
+// visitors on Singapore time. In priority order: the shorter festival wins where two overlap.
+const MOON = {
+  deepavali: { 2026: [11, 8], 2027: [10, 28], 2028: [10, 17], 2029: [11, 5], 2030: [10, 26] },
+  hariRaya: { 2026: [3, 21], 2027: [3, 10], 2028: [2, 27], 2029: [2, 14], 2030: [2, 4] },
+  lunarNewYear: { 2026: [2, 17], 2027: [2, 6], 2028: [1, 26], 2029: [2, 13], 2030: [2, 3] },
+  midAutumn: { 2026: [9, 25], 2027: [9, 15], 2028: [10, 3], 2029: [9, 22], 2030: [9, 12] },
+};
+function easter(y) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4;
+  const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+  return [Math.floor((h + l - 7 * m + 114) / 31), ((h + l - 7 * m + 114) % 31) + 1];
+}
+const SEASONS = [
+  ["deepavali", true, (y) => MOON.deepavali[y], 6, 1],
+  ["hariRaya", true, (y) => MOON.hariRaya[y], 6, 6],
+  ["lunarNewYear", true, (y) => MOON.lunarNewYear[y], 7, 14],
+  ["midAutumn", true, (y) => MOON.midAutumn[y], 7, 1],
+  ["nationalDay", true, () => [8, 9], 8, 0],
+  ["easter", false, easter, 7, 1],
+  ["valentines", false, () => [2, 14], 4, 0],
+  ["newYear", false, () => [12, 31], 3, 3],
+  ["christmas", false, () => [12, 25], 24, 2],
+  ["halloween", false, () => [10, 31], 30, 0],
+];
+const inSingapore = () => {
+  try { return Intl.DateTimeFormat().resolvedOptions().timeZone === "Asia/Singapore"; } catch { return false; }
+};
+
+/** The season the room is dressed for on the visitor's own date, or null. */
+export function seasonAt(date = new Date(), singapore = inSingapore()) {
+  const today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  for (const [name, sgOnly, day, before, after] of SEASONS) {
+    if (sgOnly && !singapore) continue;
+    for (const y of [today.getFullYear() - 1, today.getFullYear(), today.getFullYear() + 1]) {
+      const d = day(y);
+      if (!d) continue;
+      const start = new Date(y, d[0] - 1, d[1] - before), end = new Date(y, d[0] - 1, d[1] + after);
+      if (today >= start && today <= end) return name;
+    }
+  }
+  return null;
 }
 
 /** The time of day on the visitor's own clock, as the app works it out. */
@@ -105,7 +145,11 @@ export class Room {
     if (s.climate === "hot") needs.push("weather/fan.webp");
     if (s.climate === "cold") needs.push("weather/heater.webp");
     for (const id of s.furniture) needs.push(`furniture/${id}-${s.time}.webp`);
-    if (s.season === "halloween" && this.L.halloween) needs.push(`halloween/decor-${s.time}.webp`, "halloween/hat.webp");
+    const season = s.season && this.L.seasons?.[s.season];
+    if (season) {
+      needs.push(`seasons/${s.season}/decor-${s.time}.webp`);
+      if (season.costume) needs.push(`seasons/${s.season}/costume.webp`);
+    }
     const loaded = await Promise.all(needs.map(async (n) => [n, await image(n)]));
     this.img = { ...this.img, ...Object.fromEntries(loaded) };
   }
@@ -184,8 +228,8 @@ export class Room {
       ctx.drawImage(this.img[`furniture/${piece.id}-${s.time}.webp`], piece.x * u, piece.y * u, piece.w * u, piece.h * u);
     }
     // October: a bat garland and a cobweb on the walls, a jack-o'-lantern on the bookshelf.
-    const decor = s.season === "halloween" && L.halloween && this.img[`halloween/decor-${s.time}.webp`];
-    if (decor) { const d = L.halloween.decor; ctx.drawImage(decor, d.x * u, d.y * u, d.w * u, d.h * u); }
+    const decor = s.season && L.seasons?.[s.season] && this.img[`seasons/${s.season}/decor-${s.time}.webp`];
+    if (decor) { const d = L.seasons[s.season].decor; ctx.drawImage(decor, d.x * u, d.y * u, d.w * u, d.h * u); }
 
     // Back to front by where each thing meets the floor.
     const items = [];
@@ -229,14 +273,17 @@ export class Room {
     }
   }
 
-  /** In October the cat wears its witch hat: where it sits on this frame, measured in the app's art. */
+  /** The season's costume, if it has one, placed on this frame's head (measured in the app's art). */
   hat(frame) {
-    const H = this.L.halloween;
-    const image = this.img["halloween/hat.webp"];
-    if (this.state.season !== "halloween" || !H || !image || !frame.meta.hat) return null;
-    const anchor = frame.meta.hat[frame.index];
-    if (!anchor) return null;
-    return { image, anchor, pivot: H.hat.pivot, brim: H.hat.brim, scale: H.hat.cats[frame.cat].scale / H.hat.imageScale };
+    const season = this.state.season && this.L.seasons?.[this.state.season];
+    const costume = season?.costume;
+    const image = costume && this.img[`seasons/${this.state.season}/costume.webp`];
+    const head = image && frame.meta.head?.[frame.index];
+    if (!head) return null;
+    // Up the head's own axis, so a tilted head carries its hat with it.
+    const [cx, cy, r, degrees] = head, t = degrees * Math.PI / 180, up = costume.lift * r;
+    return { image, anchor: [cx + up * Math.sin(t), cy - up * Math.cos(t), degrees], pivot: costume.ball, tuck: costume.tuck,
+             scale: this.L.headScale[frame.cat] / costume.imageScale };
   }
 
   /** One frame of a sheet, pinned at its feet, tinted, with a cast shadow made from the same frame.
@@ -264,16 +311,11 @@ export class Room {
       bc.rotate(degrees * Math.PI / 180);
       bc.scale(s, s);
       bc.translate(-hat.pivot[0], -hat.pivot[1]);
-      // The hat is worn over the ears: whatever of the cat is above the brim's back edge is left out.
-      if (hat.brim) {
-        const [cx, cy, rx, ry] = hat.brim;
+      // A hat worn over the ears: whatever of the cat is above the brim's back edge is left out.
+      if (hat.tuck) {
         bc.beginPath();
-        bc.moveTo(cx - rx, cy - 20 * ry);
-        for (let i = 0; i <= 32; i++) {
-          const a = Math.PI * (1 - i / 32);
-          bc.lineTo(cx + rx * Math.cos(a), cy - ry * Math.sin(a) + 2);
-        }
-        bc.lineTo(cx + rx, cy - 20 * ry);
+        bc.moveTo(hat.tuck[0], hat.tuck[1]);
+        for (let i = 2; i + 1 < hat.tuck.length; i += 2) bc.lineTo(hat.tuck[i], hat.tuck[i + 1]);
         bc.closePath();
         bc.globalCompositeOperation = "destination-out";
         bc.fill();

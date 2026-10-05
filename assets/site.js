@@ -1,6 +1,6 @@
 // The landing page: live rooms (room.js), Mochi's speech, the day that runs as you scroll, the
 // playground, and the small demos. Everything works without it; it only adds the motion.
-import { Room, timeOfDay } from "./room.js?v=9084d336";
+import { Room, timeOfDay } from "./room.js?v=af4085ea";
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -36,8 +36,20 @@ const chip = $("[data-tod-chip]");
 chip.textContent = `${TOD[hero.state.time]} · your time`;
 const speech = $("[data-speech]");
 const lines = $$("[data-lines] li").map((li) => li.textContent);
-// October: the room's dressed for Halloween, and Mochi's in a witch hat.
-if (hero.state.season === "halloween") lines.unshift("It's Halloween month! Do you like my hat? The budgets aren't scary, I promise.");
+// A festival: the room's dressed for it, and Mochi says so first.
+const SEASON_LINES = {
+  halloween: "It's Halloween month! Do you like my hat? The budgets aren't scary, I promise.",
+  deepavali: "Happy Deepavali! I lit the lamps. May your budgets be as bright.",
+  christmas: "It's Christmas season! Do you like my Santa hat? A gift budget keeps December merry.",
+  newYear: "Happy New Year! Party hat's on. A fresh start for the budgets too.",
+  lunarNewYear: "Gong xi fa cai! Setting the ang bao money aside first keeps the month calm.",
+  valentines: "Happy Valentine's! Love is setting a date night budget together.",
+  hariRaya: "Selamat Hari Raya! Maaf zahir dan batin.",
+  easter: "Happy Easter! Do you like my bunny ears?",
+  nationalDay: "Happy National Day, Singapore! The room's in red and white.",
+  midAutumn: "Happy Mid-Autumn! I've hung up the lanterns.",
+};
+if (SEASON_LINES[hero.state.season]) lines.unshift(SEASON_LINES[hero.state.season]);
 let line = 0, typing;
 function say(text) {
   clearInterval(typing);

@@ -94,15 +94,16 @@ def main():
             appliances[name] = {**a, "cols": 1, "cw": a["w"], "ch": a["h"]}
     layout["weather"]["appliances"] = appliances
 
-    # October: the app's Halloween decorations and witch hat (tools/pet-sprites/halloween in the app repo).
-    halloween = json.loads((SRC / "halloween/halloween.json").read_text())
-    for t in TIMES:
-        webp(SRC / f"halloween/decor-{t}.webp", OUT / f"halloween/decor-{t}.webp", quality=88)
-    webp(SRC / "halloween/hat.webp", OUT / "halloween/hat.webp", quality=90)
-    hat = halloween["hat"]
-    layout["halloween"] = {"decor": halloween["decor"], "hat": {"imageScale": hat["imageScale"], "pivot": hat["pivot"],
-                                                               "brim": hat["brim"],
-                                                               "cats": {c: {"scale": v["scale"]} for c, v in hat["cats"].items()}}}
+    # The seasons: the app's decorations and costumes (tools/pet-sprites/seasons in the app repo).
+    seasons = json.loads((SRC / "seasons/seasons.json").read_text())
+    layout["seasons"] = {}
+    for name, entry in seasons["seasons"].items():
+        for t in TIMES:
+            webp(SRC / f"seasons/{name}/decor-{t}.webp", OUT / f"seasons/{name}/decor-{t}.webp", quality=88)
+        if entry.get("costume"):
+            webp(SRC / f"seasons/{name}/costume.webp", OUT / f"seasons/{name}/costume.webp", quality=90)
+        layout["seasons"][name] = entry
+    layout["headScale"] = {c: v["scale"] for c, v in seasons["head"].items()}
 
     for cat, base in (("tabby", SRC), ("tuxedo", SRC / "cats/tuxedo")):
         clips = manifest["clips"] if cat == "tabby" else json.loads((base / "clips.json").read_text())
@@ -110,11 +111,11 @@ def main():
         for clip in CLIPS:
             frames = sorted((base / clip).glob("*.webp"))
             meta = sheet(frames, clips[clip], CAT_SCALE, OUT / f"{cat}/{clip}.webp")
-            # The hat's place per frame, moved into the cropped frame (same px as fx and fy).
-            anchors = hat["cats"][cat]["clips"].get(clip)
-            if anchors:
+            # The head on each frame (where costumes go), moved into the cropped frame (same px as fx and fy).
+            heads = seasons["head"][cat]["clips"].get(clip)
+            if heads:
                 dx, dy = clips[clip]["fx"] - meta["fx"], clips[clip]["fy"] - meta["fy"]
-                meta["hat"] = [[round(x - dx, 1), round(y - dy, 1), t] for x, y, t in anchors]
+                meta["head"] = [[round(x - dx, 1), round(y - dy, 1), r, t] for x, y, r, t in heads]
             layout["cats"][cat][clip] = meta
 
     (OUT / "layout.json").write_text(json.dumps(layout, separators=(",", ":")))
