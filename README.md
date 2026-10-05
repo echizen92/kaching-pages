@@ -86,7 +86,10 @@ privacy URL `https://kachingz.com/privacy/`) the landing page is the front
 page (`LANDING_AT_ROOT = True`); `/home/` redirects to it.
 
 The app downloads companion-content.json, prompt-overlay.json and
-shortcut-guide.json from here — keep their names and shapes.
+shortcut-guide.json from here — keep their names and shapes. From 1.0.13 the
+Shortcut guide reads shortcut-guide-v2.json instead (both automations, Every
+Purchase and Tap to Pay, with iOS 27 and iOS 26 steps); older builds keep
+reading shortcut-guide.json, so keep both.
 
 ## The landing page (redesigned 4 Oct 2026)
 

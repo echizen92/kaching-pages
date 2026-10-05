@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "updated": "2026-10-05",
+  "notification27": [
+    "Open Kachingz once after installing or updating, so Shortcuts can see its Log Transaction action.",
+    "Open Shortcuts. Tap ‹ until you reach Library, then tap Automation and the + button.",
+    "If you see \"Describe a shortcut\", tap Edit. In the search sheet, tap Automation. Under Apps, choose Notification (\"When I receive a notification from…\").",
+    "Tap App and choose Wallet. Leave Automation switched on.",
+    "Search for \"Log Transaction\" and tap the Kachingz action.",
+    "Tap Amount › Select Variable › Notification. Tap the blue Notification tag and choose Body: that's the price.",
+    "Tap Merchant › Select Variable › Notification, tap the tag, and choose Subtitle: that's the shop.",
+    "Tap Card Name › Select Variable › Notification, tap the tag, and choose Title: that's your bank, which Kachingz matches to the card you saved.",
+    "Tap ‹ to save. Your next purchase logs itself."
+  ],
+  "walletTap27": [
+    "Open Kachingz once after installing or updating, so Shortcuts can see its Log Transaction action.",
+    "Open Shortcuts. Tap ‹ until you reach Library, then tap Automation and the + button.",
+    "If you see \"Describe a shortcut\", tap Edit. In the search sheet, tap Automation. Under Apps, choose Wallet (\"When I tap a Wallet Card or Pass\"). Leave Any Card, Any Category and Any Merchant as they are.",
+    "Search for \"Log Transaction\" and tap the Kachingz action.",
+    "Tap Amount › Select Variable › Transaction. Tap the blue Transaction tag and choose Amount.",
+    "Tap Merchant › Select Variable › Transaction, tap the tag, and choose Merchant.",
+    "Tap Card Name › Select Variable › Transaction, tap the tag, and choose Card or Pass.",
+    "Tap ‹ to save. Your next Apple Pay purchase logs itself."
+  ],
+  "walletTap26": [
+    "Open Kachingz once after installing or updating, so Shortcuts can see its Log Transaction action.",
+    "Open Shortcuts, tap the Automation tab, then New Automation (or + at the top if you already have one).",
+    "Choose Wallet. Leave every card and category selected, choose Run Immediately, and tap Next.",
+    "Tap New Blank Automation, then search for \"Log Transaction\" and tap the Kachingz action.",
+    "Tap Amount › Shortcut Input, tap Shortcut Input again, and choose Amount.",
+    "Tap Merchant › Shortcut Input, tap it again, and choose Merchant.",
+    "Tap Card Name › Shortcut Input, tap it again, and choose Card or Pass.",
+    "Tap Done. Your next Apple Pay purchase logs itself."
+  ]
+}

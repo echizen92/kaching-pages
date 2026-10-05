@@ -1,24 +1,24 @@
 {
-  "version": 1,
-  "updated": "2026-09-02",
-  "guide": {
-    "quickAddTitle": "Quick add: get the pre-set shortcut",
-    "quickAddSubtitle": "Installs Log Transaction with Amount, Merchant & Card already wired — you still make the automation.",
-    "steps": {
-      "1": "Open the Kachingz app once after installing (this registers the action)",
-      "2": "Open Shortcuts → Automation tab → Create New Automation (the + icon only appears if you already have an automation)",
-      "3": "Scroll down and select Wallet → in the trigger options, App: Wallet (catches tap-to-pay AND online purchases)",
-      "4": "Select all Cards and Categories → do not filter any merchants → Select Run Immediately → Go next",
-      "5": "In the actions list, search \"Log Transaction\" → select Kachingz's action",
-      "6": "Automation tab → select the created automation → select \"Log Transaction\"",
-      "7": "Tap the Amount field → select Shortcut Input → tap it again → pick \"Amount\" (the transaction's price)",
-      "8": "Tap the Merchant field → select Shortcut Input → tap it again → pick \"Merchant\" (the store name)",
-      "9": "Tap the Card Name field → select Shortcut Input → tap it again → pick \"Card or Pass\" (the card used)",
-      "10": "Tap the tick (top right) to finish"
-    },
-    "step3iOS26": "Scroll down and select Wallet → Card: Any Card • Merchant: Any",
-    "fieldHint": "This picks the structured transaction fields — NOT the notification text. The \"Shortcut Input → tap it again\" step opens the transaction's sub-fields (Amount, Merchant, Card/Pass); selecting them directly is what makes every purchase log correctly, even when the notification preview is truncated.",
-    "fieldHintFallback": "If a field doesn't offer those sub-fields, you can also type the variable name: tap the field → search \"Amount\" → pick the transaction's Amount from the suggestions.",
-    "doneLine": "That's it — every purchase logs automatically, even with the phone locked. Make a purchase and the green banner above appears once it's verified."
-  }
+    "version": 1,
+    "updated": "2026-10-05",
+    "guide": {
+        "quickAddTitle": "Quick add: get the pre-set shortcut",
+        "quickAddSubtitle": "Installs Log Transaction with Amount, Merchant & Card already wired \u2014 you still make the automation.",
+        "steps": {
+            "1": "Open the Kachingz app once after installing (this registers the action)",
+            "2": "Open Shortcuts \u2192 Automation. On iOS 27: tap \u2039 until you reach Library, then Automation \u2192 +. On iOS 26: the Automation tab \u2192 New Automation",
+            "3": "If you see \"Describe a shortcut\", tap Edit \u2192 in the search sheet tap Automation \u2192 under Apps choose Wallet (\"When I tap a Wallet Card or Pass\"). Leave Any Card, Any Category and Any Merchant",
+            "4": "On iOS 26: leave every card and category selected \u2192 Run Immediately \u2192 Next \u2192 New Blank Automation. On iOS 27: Automation stays switched on",
+            "5": "Search \"Log Transaction\" \u2192 select Kachingz's action",
+            "6": "In the Log Transaction action, set Amount, Merchant and Card Name as below",
+            "7": "Amount \u2192 on iOS 27: Select Variable \u2192 Transaction \u2192 tap it \u2192 Amount. On iOS 26: Shortcut Input \u2192 tap it again \u2192 Amount",
+            "8": "Merchant \u2192 Transaction (iOS 26: Shortcut Input) \u2192 tap it \u2192 Merchant",
+            "9": "Card Name \u2192 Transaction (iOS 26: Shortcut Input) \u2192 tap it \u2192 Card or Pass",
+            "10": "Save: tap \u2039 on iOS 27, or Done on iOS 26"
+        },
+        "step3iOS26": "Choose Wallet \u2192 leave every card and category selected",
+        "fieldHint": "Pick the purchase's own fields (the Transaction on iOS 27, Shortcut Input on iOS 26), not text from a notification, so every purchase logs the exact amount, shop and card.",
+        "fieldHintFallback": "If a field doesn't offer those sub-fields, tap the blue tag after choosing it: it opens Amount, Merchant and Card or Pass.",
+        "doneLine": "That's it \u2014 every purchase logs automatically, even with the phone locked. Make a purchase and the green banner above appears once it's verified."
+    }
 }
