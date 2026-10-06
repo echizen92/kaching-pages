@@ -270,6 +270,7 @@ HOME = f"""
       <h3>Advice from your own numbers.</h3>
       <p>Weekly reviews, budget suggestions and month-end projections, worked out from what you've recorded. Ten reports free; unlimited with Pro. Suggestions are informational, not financial advice.</p>
       <div class="shot"><img src="{{UP}}assets/ui/insights.webp" alt="Insights: S$205.56 spent this week so far, 13% less than the same point last week, with a chart by day" width="900" height="1016" loading="lazy"></div>
+      <div class="note"><span class="name">Mochi</span><p>I read your weekly insight! You've spent 13% less than this time last week.</p></div>
     </div>
     <div class="tile travel" data-reveal style="--d:.08s">
       <h3>Travel without the maths.</h3>
@@ -286,7 +287,12 @@ HOME = f"""
       <p>Amount, merchant, done. Undo is always there if you slip.</p>
       <div class="shot"><img src="{{UP}}assets/ui/add.webp" alt="Add Transaction: S$18.50 at Coffee shop for toast and coffee" width="900" height="1031" loading="lazy"></div>
     </div>
-    <div class="tile cards" data-reveal style="--d:.08s">
+    <div class="tile budgets" data-reveal style="--d:.08s">
+      <h3>Budgets that keep pace.</h3>
+      <p>Each budget shows what's left and whether you're on pace for the month.</p>
+      <div class="shot"><img src="{{UP}}assets/ui/budgets.webp" alt="A budget: S$2,302.61 left, 14% spent with 7% of the month gone, on pace with 29 days left" width="900" height="331" loading="lazy"></div>
+    </div>
+    <div class="tile cards" data-reveal style="--d:.16s">
       <h3>Cards and pay-later, sorted.</h3>
       <p>Track credit, debit and buy-now-pay-later accounts. Card repayments are kept apart from your spending.</p>
       <div class="cardstack" aria-hidden="true"><div>Debit<span>•••• 4021</span></div><div>Credit<span>•••• 7781</span></div><div>Pay later<span>3 of 4 paid</span></div></div>
