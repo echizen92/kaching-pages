@@ -91,6 +91,23 @@ const reveal = new IntersectionObserver((entries) => {
 }, { rootMargin: "0px 0px -12% 0px" });
 $$("[data-reveal]").forEach((el) => reveal.observe(el));
 
+// The film: the play button starts whichever cut is showing (16:9 or the phone's 9:16), with sound,
+// since a tap counts as the gesture browsers need. If the layout flips mid-play, both stop.
+for (const film of $$("[data-film]")) {
+  const videos = $$("video", film);
+  const showing = () => videos.find((v) => v.offsetParent !== null) ?? videos[0];
+  // if the browser refuses to play, the button comes back
+  $("[data-play]", film).addEventListener("click", () => showing().play().catch(() => film.classList.remove("playing")));
+  for (const v of videos) {
+    v.addEventListener("play", () => film.classList.add("playing"));
+    v.addEventListener("ended", () => film.classList.remove("playing"));
+  }
+  matchMedia("(max-width: 700px)").addEventListener("change", () => {
+    videos.forEach((v) => v.pause());
+    film.classList.remove("playing");
+  });
+}
+
 // A day with Mochi: whichever chapter holds the middle of the screen sets the time.
 const day = $(".day");
 const storyCanvas = $("canvas[data-story]");

@@ -144,6 +144,26 @@ HOME = f"""
   <span>Know what you can spend</span><span>Purchases that log themselves</span><span>Bills before they bite</span><span>A tabby or a tuxedo</span><span>No bank login</span><span>Your weather in the window</span>
 </div></div>
 
+<section class="film" id="film">
+  <div class="intro wrap">
+    <div class="eyebrow" data-reveal>The film</div>
+    <h2 data-reveal>Every <em>ka-ching,</em> counted.</h2>
+    <p data-reveal>Thirty seconds with Mochi: the purchases, the second bubble tea, and a room that grows with good habits.</p>
+  </div>
+  <div class="wrap">
+    <figure class="player" data-reveal data-film>
+      <video class="wide" controls playsinline preload="none" poster="{{UP}}assets/film/kachingz-film-poster-16x9.jpg?v={version("assets/film/kachingz-film-poster-16x9.jpg")}" aria-describedby="film-about">
+        <source src="{{UP}}assets/film/kachingz-film-16x9-1080.mp4?v={version("assets/film/kachingz-film-16x9-1080.mp4")}" type="video/mp4">
+      </video>
+      <video class="tall" controls playsinline preload="none" poster="{{UP}}assets/film/kachingz-film-poster-9x16.jpg?v={version("assets/film/kachingz-film-poster-9x16.jpg")}" aria-describedby="film-about">
+        <source src="{{UP}}assets/film/kachingz-film-9x16-720.mp4?v={version("assets/film/kachingz-film-9x16-720.mp4")}" type="video/mp4">
+      </video>
+      <button class="play" type="button" data-play><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>Play the film <span>0:31</span></button>
+      <figcaption id="film-about" class="sr-only">A 31-second film with music and no dialogue. Each time you tap to pay, Mochi the cat logs it: coffee, a train ride, a bubble tea. At a second bubble tea the music stops and Mochi looks worried. Then the app: no bank login, what's left to spend, a kind word when you overspend, and paws that decorate Mochi's room through the seasons. Mochi comes with Kachingz Pro.</figcaption>
+    </figure>
+  </div>
+</section>
+
 <section class="day" id="day" data-time="dawn">
   <div class="intro wrap">
     <div class="eyebrow" data-reveal>A day with Mochi</div>
