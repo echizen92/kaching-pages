@@ -102,7 +102,7 @@ h1 em, h2 em, .display em { font-style: italic; font-weight: 560; color: var(--o
   box-shadow: 0 3px 0 #E4D3BC, 0 18px 30px -18px rgba(70,45,20,.4); }
 .speech .name { position: absolute; top: -16px; left: 20px; background: var(--orange); color: #fff; font: 700 15px/1 var(--display);
   font-variation-settings: "SOFT" 100; padding: 8px 14px; border-radius: 12px; transform: rotate(-3deg); box-shadow: 0 3px 0 var(--orange-ink); }
-.speech .hearts { position: absolute; top: -14px; right: 18px; background: var(--card); padding: 4px 10px; border-radius: 999px; color: #E8506A; font-size: 14px; letter-spacing: 2px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.speech .hearts { position: absolute; top: -14px; right: 18px; background: var(--card); padding: 5px 10px; border-radius: 999px; color: #E8506A; display: inline-flex; gap: 3px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
 .speech p { margin: 0; font-size: 19px; font-weight: 600; line-height: 1.35; min-height: 2.7em; }
 .speech p .caret { display: inline-block; width: 2px; height: 1em; background: var(--orange); vertical-align: -2px; margin-left: 2px; animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
@@ -236,7 +236,7 @@ h1 em, h2 em, .display em { font-style: italic; font-weight: 560; color: var(--o
 .fx .swap.out { transform: translateY(-40%); opacity: 0; }
 .mask { margin-top: auto; padding-top: 26px; display: flex; align-items: center; gap: 16px; }
 .mask .val { font: 650 clamp(30px, 3.1vw, 44px)/1 var(--display); font-variation-settings: "SOFT" 100; font-feature-settings: "tnum"; min-width: 6ch; }
-.mask button { width: 54px; height: 54px; border-radius: 50%; border: 0; background: var(--card); cursor: pointer; font-size: 22px; box-shadow: 0 6px 16px rgba(0,0,0,.1); transition: transform .2s var(--ease); }
+.mask button { width: 54px; height: 54px; border-radius: 50%; border: 0; background: var(--card); cursor: pointer; display: grid; place-items: center; color: var(--ink, #272921); box-shadow: 0 6px 16px rgba(0,0,0,.1); transition: transform .2s var(--ease); }
 .mask button:hover { transform: scale(1.06); }
 .cardstack { margin-top: auto; display: flex; justify-content: center; padding: 0 0 18px; }
 /* card width follows the tile, so the fan fits narrow tiles too */
