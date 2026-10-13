@@ -8,11 +8,28 @@ prompt-overlay.json, shortcut-guide.json) are not touched by this script.
 import hashlib
 import re
 import pathlib
+from datetime import date
+from urllib.parse import urljoin
 
 ROOT = pathlib.Path(__file__).parent
 APP_STORE = "https://apps.apple.com/app/id6798360020"
 EMAIL = "faiz.rashid@gmx.us"
 UPDATED = "30 September 2026"
+SITE = "https://kachingz.com/"
+# What a search result and a shared link say about the app itself.
+APP_LD = """<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"MobileApplication","name":"Kachingz","alternateName":"Kachingz: Cute Budget Tracker",
+  "description":"A budget and expense tracker for iPhone with a companion cat. See what is left to spend after bills and savings, log Apple Pay purchases automatically, and plan budgets without connecting a bank.",
+  "operatingSystem":"iOS","applicationCategory":"FinanceApplication","inLanguage":"en",
+  "url":"https://kachingz.com/","installUrl":"https://apps.apple.com/app/id6798360020","downloadUrl":"https://apps.apple.com/app/id6798360020",
+  "image":"https://kachingz.com/assets/icon.png","screenshot":"https://kachingz.com/assets/og.jpg",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"SGD","category":"free"},
+  "publisher":{"@id":"https://kachingz.com/#org"}},
+ {"@type":"Organization","@id":"https://kachingz.com/#org","name":"Kachingz","url":"https://kachingz.com/","logo":"https://kachingz.com/assets/icon.png","email":"faiz.rashid@gmx.us"},
+ {"@type":"WebSite","name":"Kachingz","url":"https://kachingz.com/","inLanguage":"en"}
+]}
+</script>"""
 
 # The front page is what App Store Connect's privacy URL points at until it is
 # changed to /privacy/. While False, the front page is the privacy policy and
@@ -51,6 +68,15 @@ def page(path, title, description, body, current="", landing=False):
     body = body.replace("{UP}", up)
     script = f'\n<script type="module" src="{up}assets/site.js?v={version("assets/site.js")}"></script>' if landing else ""
     preload = f'\n<link rel="preload" href="{up}assets/room/layout.json" as="fetch" crossorigin>' if landing else ""
+    # Canonical and og:url point at the one public address of each page; the
+    # 404 page is kept out of the index instead.
+    if path == "404":
+        seo = '\n<meta name="robots" content="noindex">'
+    else:
+        address = SITE + (f"{path}/" if path else "")
+        seo = f'\n<link rel="canonical" href="{address}">\n<meta property="og:url" content="{address}">'
+    if landing:
+        seo += "\n" + APP_LD
     html = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -59,10 +85,16 @@ def page(path, title, description, body, current="", landing=False):
 <title>{title}</title>
 <meta name="description" content="{description}">
 <meta name="theme-color" content="#FBF3E8">
-<meta name="apple-itunes-app" content="app-id=6798360020">
+<meta name="apple-itunes-app" content="app-id=6798360020">{seo}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Kachingz">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{description}">
 <meta property="og:image" content="https://kachingz.com/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Kachingz: Mochi the cat in a cosy room above the money left to spend">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="{up}assets/favicon.png">
 <link rel="apple-touch-icon" href="{up}assets/apple-touch-icon.png">
 {FONTS.replace('{up}', up)}
@@ -98,11 +130,14 @@ def page(path, title, description, body, current="", landing=False):
 
 
 def redirect(filename, target):
+    absolute = SITE + filename.rsplit("/", 1)[0] + "/" if "/" in filename else SITE
+    absolute = urljoin(absolute, target)
     (ROOT / filename).write_text(f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <title>Moved</title>
 <meta http-equiv="refresh" content="0; url={target}">
-<link rel="canonical" href="{target}">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="{absolute}">
 </head><body><p>This page has moved to <a href="{target}">{target}</a>.</p></body></html>
 """)
     print("wrote", filename, "->", target)
@@ -513,8 +548,8 @@ if __name__ == "__main__":
     # site.js imports room.js; stamp its version so a changed room.js isn't served from cache.
     site_js = ROOT / "assets/site.js"
     site_js.write_text(re.sub(r'"\./room\.js(\?v=[0-9a-f]+)?"', f'"./room.js?v={version("assets/room.js")}"', site_js.read_text()))
-    page("" if LANDING_AT_ROOT else "home", "Kachingz: the budget app with a cat in it",
-         "See what you can really spend after bills and savings, log Apple Pay purchases automatically, and keep a cosy room where your cat keeps count with you. No bank login.",
+    page("" if LANDING_AT_ROOT else "home", "Kachingz: Budget &amp; Expense Tracker with a Cat",
+         "A budget and expense tracker for iPhone with a cat. See what's left after bills, log Apple Pay purchases automatically. No bank login needed.",
          HOME, landing=True)
     if not LANDING_AT_ROOT:
         page("", "Privacy Policy · Kachingz",
@@ -540,3 +575,14 @@ if __name__ == "__main__":
         # /home/ was the landing page's address before it moved to the front.
         (ROOT / "home").mkdir(exist_ok=True)
         redirect("home/index.html", "../")
+    # robots.txt and the sitemap: the pages a search engine should index, nothing else.
+    pages = ["", "support/", "privacy/", "terms/", "your-data/"]
+    today = date.today().isoformat()
+    (ROOT / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "".join(f"  <url><loc>{SITE}{p}</loc><lastmod>{today}</lastmod></url>\n" for p in pages)
+        + "</urlset>\n")
+    (ROOT / "robots.txt").write_text(
+        "User-agent: *\nAllow: /\nDisallow: /tools/\nDisallow: /lab/\n\n"
+        f"Sitemap: {SITE}sitemap.xml\n")
+    print("wrote sitemap.xml, robots.txt")
