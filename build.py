@@ -76,6 +76,8 @@ def page(path, title, description, body, current="", landing=False):
         address = SITE + (f"{path}/" if path else "")
         seo = f'\n<link rel="canonical" href="{address}">\n<meta property="og:url" content="{address}">'
     if landing:
+        # Google Search Console ownership (kachingz.com, URL-prefix property). Keep it.
+        seo += '\n<meta name="google-site-verification" content="rc9DhaRMvc59Jsp3yEp8k4GF0fFlVUwxNv0fcheVNrU">'
         seo += "\n" + APP_LD
     html = f"""<!doctype html>
 <html lang="en">
