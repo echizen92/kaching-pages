@@ -114,6 +114,9 @@ def page(path, title, description, body, current="", landing=False):
 <footer><div class="wrap">
   <a class="brand" href="{home}"><img src="{up}assets/icon.png" alt="" width="34" height="34">Kachingz</a>
   <nav aria-label="Footer">
+    <a href="{up}apple-pay-expense-tracker/">Apple Pay tracking</a>
+    <a href="{up}budget-app-singapore/">For Singapore</a>
+    <a href="{up}budget-app-without-bank-login/">No bank login</a>
     <a href="{up}privacy/">Privacy Policy</a>
     <a href="{up}terms/">Terms of Use</a>
     <a href="{up}support/">Support</a>
@@ -546,6 +549,95 @@ NOT_FOUND = """
 </div></section>
 """
 
+
+# ---------------------------------------------------------------------------
+# Guides: one search intent each, written from what the app actually does.
+APPLE_PAY_GUIDE = f"""
+<section class="doc"><div class="wrap">
+<div class="eyebrow">Guide</div>
+<h1>Track Apple Pay spending automatically on iPhone</h1>
+<p class="lede">Tap to pay as usual and the purchase is already in your budget: merchant, amount and card, logged in the background. No bank login, and your records stay on your iPhone.</p>
+
+<h2>How it works</h2>
+<p>Apple Wallet can run a Shortcuts automation every time you pay with your iPhone. Kachingz comes with a ready-made shortcut for that automation, so each tap to pay is recorded as a purchase, even while your phone is locked.</p>
+
+<h2>Set it up in a few minutes</h2>
+<ol>
+  <li>Install Kachingz from the App Store.</li>
+  <li>In the app, tap your profile picture, then <b>Shortcut setup</b>.</li>
+  <li>Follow the guide to add the Apple Wallet automation with the included shortcut.</li>
+  <li>Pay as normal. Each purchase appears in Activity with an <b>Undo</b>, in case you want it gone.</li>
+</ol>
+
+<h2>What gets recorded</h2>
+<ul>
+  <li><b>Merchant, amount and card</b> from the payment.</li>
+  <li><b>A category</b>, remembered per merchant: correct it once and Kachingz uses your choice next time.</li>
+  <li><b>Overseas purchases</b> converted to your home currency at that day's reference rate, with the original amount kept beneath it.</li>
+</ul>
+
+<h2>Cash and other payments</h2>
+<p>Anything you don't pay with Apple Pay, add by hand: tap <b>Add</b> in the tab bar, enter the amount and the shop, and save. It takes a few seconds.</p>
+
+<h2>Then see what's left</h2>
+<p>Every purchase feeds <b>Available to spend</b>: your tracked balance, minus bills due before payday and money you've set aside. Budgets, a spending calendar and a companion cat who keeps count with you do the rest.</p>
+<div class="cta">{store_button()}</div>
+<p class="meta">More help on the <a href="{{UP}}support/">Support</a> page.</p>
+</div></section>
+"""
+
+SINGAPORE_GUIDE = f"""
+<section class="doc"><div class="wrap">
+<div class="eyebrow">Guide</div>
+<h1>A budget app that knows Singapore</h1>
+<p class="lede">Kachingz is a budget and expense tracker for iPhone, made in Singapore. It works in Singapore dollars, plans for the festivals you actually celebrate, and logs Apple Pay purchases on its own.</p>
+
+<h2>What's really left before payday</h2>
+<p><b>Available to spend</b> takes your tracked balance and subtracts the bills due before your next payday and what you've set aside for savings. It's the number to check before a big purchase.</p>
+
+<h2>Festive budgets</h2>
+<p>About four weeks before Deepavali, Hari Raya, Lunar New Year, Mid-Autumn and Christmas, Kachingz offers a festive budget on Home. Purchases in the Festive category count towards it, and you can plan ang bao or duit raya packets alongside it, so the celebrations don't swallow the month.</p>
+
+<h2>Spending abroad</h2>
+<p>Weekend in JB, a week in Bangkok or Tokyo: purchases in ringgit, baht, yen or any other currency are converted to Singapore dollars at that day's reference rate, with the original amount shown beneath. If your bank charged a different amount, edit it and Kachingz keeps both.</p>
+
+<h2>Logs itself when you tap to pay</h2>
+<p>An Apple Wallet automation records each Apple Pay purchase with the merchant, amount and card. See <a href="{{UP}}apple-pay-expense-tracker/">how to set it up</a>.</p>
+
+<h2>No bank login</h2>
+<p>Kachingz never asks for your bank details. Your records stay on your iPhone, and there are no ads or tracking.</p>
+<div class="cta">{store_button()}</div>
+</div></section>
+"""
+
+NO_BANK_GUIDE = f"""
+<section class="doc"><div class="wrap">
+<div class="eyebrow">Guide</div>
+<h1>Budgeting without handing over your bank login</h1>
+<p class="lede">Plenty of people would rather not link their bank to a budgeting app. Kachingz is built for them: it never asks for bank details, and your records stay on your iPhone.</p>
+
+<h2>How it knows what you spent</h2>
+<ul>
+  <li><b>Apple Pay purchases log themselves</b> through an Apple Wallet automation. <a href="{{UP}}apple-pay-expense-tracker/">Here's how it works</a>.</li>
+  <li><b>Everything else takes seconds by hand</b>: tap Add, enter the amount and the shop.</li>
+</ul>
+
+<h2>What stays where</h2>
+<ul>
+  <li>Your purchases, budgets, bills and goals are stored on your iPhone.</li>
+  <li>There's no account to create, and no ads or tracking.</li>
+  <li>If you use the optional AI reports, the relevant figures are sent to our service to write the report. The server keeps no copy of the request, only a short anonymous log. The <a href="{{UP}}privacy/">Privacy Policy</a> has the details.</li>
+</ul>
+
+<h2>The honest trade-off</h2>
+<p>Without a bank connection, Kachingz knows what you record, not what your bank sees. Your balance is the one you track, and cash spending needs adding by hand. In return, nothing about your bank account ever leaves it.</p>
+
+<h2>What you get</h2>
+<p>A clear <b>Available to spend</b> after bills and savings, category budgets with a pace marker, bills and subscriptions in one list, a spending calendar, and a cat in a cosy room who keeps count with you.</p>
+<div class="cta">{store_button()}</div>
+</div></section>
+"""
+
 if __name__ == "__main__":
     # site.js imports room.js; stamp its version so a changed room.js isn't served from cache.
     site_js = ROOT / "assets/site.js"
@@ -566,6 +658,15 @@ if __name__ == "__main__":
          SUPPORT, "support/")
     page("your-data", "Your data · Kachingz",
          "How to delete your Kachingz data and what our AI server keeps.", YOUR_DATA, "your-data/")
+    page("apple-pay-expense-tracker", "Track Apple Pay Spending Automatically on iPhone · Kachingz",
+         "Log every Apple Pay purchase automatically with an Apple Wallet automation. Merchant, amount and card recorded. No bank login.",
+         APPLE_PAY_GUIDE)
+    page("budget-app-singapore", "Budget App for Singapore · Kachingz",
+         "Track spending in Singapore dollars, plan festive budgets for Deepavali, Hari Raya and Lunar New Year, and log Apple Pay automatically.",
+         SINGAPORE_GUIDE)
+    page("budget-app-without-bank-login", "Budget App Without a Bank Login · Kachingz",
+         "Budget on iPhone without linking your bank. Records stay on your iPhone, Apple Pay purchases log themselves, no ads or tracking.",
+         NO_BANK_GUIDE)
     page("404", "Page not found · Kachingz", "Page not found.", NOT_FOUND)
     (ROOT / "404.html").write_text((ROOT / "404" / "index.html").read_text())
     (ROOT / "404" / "index.html").unlink()
@@ -578,7 +679,8 @@ if __name__ == "__main__":
         (ROOT / "home").mkdir(exist_ok=True)
         redirect("home/index.html", "../")
     # robots.txt and the sitemap: the pages a search engine should index, nothing else.
-    pages = ["", "support/", "privacy/", "terms/", "your-data/"]
+    pages = ["", "apple-pay-expense-tracker/", "budget-app-singapore/", "budget-app-without-bank-login/",
+             "support/", "privacy/", "terms/", "your-data/"]
     today = date.today().isoformat()
     (ROOT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
