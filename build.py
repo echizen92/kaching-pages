@@ -118,7 +118,7 @@ def page(path, title, description, body, current="", landing=False):
     <a href="{up}budget-app-singapore/">For Singapore</a>
     <a href="{up}budget-app-without-bank-login/">No bank login</a>
     <a href="{up}daily-spending-allowance/">Spend a day until payday</a>
-    <a href="{up}alipay-expense-tracker/">Alipay in China</a>
+    {'<a href="' + up + 'alipay-expense-tracker/">Alipay in China</a>' if ALIPAY_LIVE else ''}
     <a href="{up}privacy/">Privacy Policy</a>
     <a href="{up}terms/">Terms of Use</a>
     <a href="{up}support/">Support</a>
@@ -640,6 +640,10 @@ NO_BANK_GUIDE = f"""
 </div></section>
 """
 
+# The Alipay guide describes 1.0.20 (metro as Transport, "Alipay" naming, one
+# row per payment). Publish it once that version is live.
+ALIPAY_LIVE = False
+
 RUNWAY_GUIDE = f"""
 <section class="doc"><div class="wrap">
 <div class="eyebrow">Guide</div>
@@ -735,7 +739,8 @@ if __name__ == "__main__":
     page("daily-spending-allowance", "How Much Can I Spend a Day Until Payday? · Kachingz",
          "Work out a daily spending allowance that lasts until payday, after bills and savings. Keep money back, plan big spends, compare with your real pace.",
          RUNWAY_GUIDE)
-    page("alipay-expense-tracker", "Track Alipay Spending in China on iPhone · Kachingz",
+    if ALIPAY_LIVE:
+      page("alipay-expense-tracker", "Track Alipay Spending in China on iPhone · Kachingz",
          "Log Alipay payments automatically from their notifications while travelling in China, converted from yuan to your home currency.",
          ALIPAY_GUIDE)
     page("404", "Page not found · Kachingz", "Page not found.", NOT_FOUND)
@@ -751,7 +756,7 @@ if __name__ == "__main__":
         redirect("home/index.html", "../")
     # robots.txt and the sitemap: the pages a search engine should index, nothing else.
     pages = ["", "apple-pay-expense-tracker/", "budget-app-singapore/", "budget-app-without-bank-login/",
-             "daily-spending-allowance/", "alipay-expense-tracker/", "support/", "privacy/", "terms/", "your-data/"]
+             "daily-spending-allowance/"] + (["alipay-expense-tracker/"] if ALIPAY_LIVE else []) + ["support/", "privacy/", "terms/", "your-data/"]
     today = date.today().isoformat()
     (ROOT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
