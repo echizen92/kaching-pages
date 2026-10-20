@@ -117,6 +117,8 @@ def page(path, title, description, body, current="", landing=False):
     <a href="{up}apple-pay-expense-tracker/">Apple Pay tracking</a>
     <a href="{up}budget-app-singapore/">For Singapore</a>
     <a href="{up}budget-app-without-bank-login/">No bank login</a>
+    <a href="{up}daily-spending-allowance/">Spend a day until payday</a>
+    <a href="{up}alipay-expense-tracker/">Alipay in China</a>
     <a href="{up}privacy/">Privacy Policy</a>
     <a href="{up}terms/">Terms of Use</a>
     <a href="{up}support/">Support</a>
@@ -638,6 +640,69 @@ NO_BANK_GUIDE = f"""
 </div></section>
 """
 
+RUNWAY_GUIDE = f"""
+<section class="doc"><div class="wrap">
+<div class="eyebrow">Guide</div>
+<h1>How much can I spend a day until payday?</h1>
+<p class="lede">It's the question that matters before you buy something, and most budget apps leave you to work it out. Kachingz answers it on the Plan tab with one number: a daily allowance that lasts until your next payday.</p>
+
+<h2>Where the number comes from</h2>
+<p>Kachingz starts from <b>Available to spend</b>: your tracked balance, minus the bills due before payday and the money you've set aside. It then divides what's left by the days until payday, counting today but not payday itself.</p>
+<p>Say you have S$1,100 available and payday is 10 days away. That's S$110 a day.</p>
+
+<h2>Keep something back</h2>
+<p>If you'd like money left over when your salary arrives, tap <b>Keep back</b> and enter the amount. It comes out before the daily figure is worked out, so keeping S$300 of that S$1,100 leaves S$80 a day.</p>
+
+<h2>Plan a big spend</h2>
+<p>A dinner on Saturday, a concert, a gift: tap <b>Plan a spend</b>, add the amount and the day, and the daily allowance makes room for it. Plans stay on your iPhone.</p>
+
+<h2>Compared with how you actually spend</h2>
+<p>Kachingz also shows your recent pace: what you spent over the last 30 days, divided by 30, quiet days included. If that pace would run you short before payday, it tells you which day, so you can slow down early instead of finding out at the end of the month.</p>
+
+<h2>Set it up</h2>
+<ol>
+  <li>Install Kachingz and add your pay schedule on the Plan tab.</li>
+  <li>Add your bills and subscriptions, so their money is held back before payday.</li>
+  <li>Log purchases as they happen. Apple Pay purchases can <a href="{{UP}}apple-pay-expense-tracker/">log themselves</a>.</li>
+</ol>
+<p>Your daily allowance updates with every purchase, and Mochi the cat walks the days to payday with you.</p>
+<div class="cta">{store_button()}</div>
+</div></section>
+"""
+
+ALIPAY_GUIDE = f"""
+<section class="doc"><div class="wrap">
+<div class="eyebrow">Guide</div>
+<h1>Track Alipay spending when you travel to China</h1>
+<p class="lede">On a trip to China, most of what you buy goes through Alipay: metro rides, meals, taxis, shops. Kachingz can record each Alipay payment from its notification and convert it from yuan to your home currency, so the trip shows up in your budget as it happens.</p>
+
+<h2>How it works</h2>
+<p>iPhone's Shortcuts app can run an automation whenever a notification arrives from an app. Point one at Alipay, and every payment notification is passed to Kachingz's <b>Log Transaction</b> action, which reads the amount and the shop and saves the purchase.</p>
+
+<h2>Set it up</h2>
+<ol>
+  <li>Install Kachingz, and allow Alipay to send you notifications.</li>
+  <li>Open Shortcuts, go to <b>Automation</b>, tap <b>+</b> and choose <b>Notification</b>. Pick <b>Alipay</b> as the app and set it to run immediately.</li>
+  <li>Add the Kachingz <b>Log Transaction</b> action. Set <b>Amount</b> and <b>Merchant</b> to the notification's <b>Body</b>, and type <b>Alipay</b> as the <b>Card Name</b>.</li>
+</ol>
+<p>Typing Alipay as the card name matters: it tells Kachingz that a ¥ price means Chinese yuan, not Japanese yen.</p>
+
+<h2>What gets recorded</h2>
+<ul>
+  <li><b>The amount in yuan</b>, converted to your home currency at that day's reference rate, with the original CNY amount kept beneath it.</li>
+  <li><b>The shop</b>, in English or Chinese, as Alipay names it. Metro rides are filed under Transport.</li>
+  <li><b>Payments without a shop name.</b> Some Alipay notices only say you spent an amount. Kachingz records them as "Alipay" and marks them so you can add the shop later.</li>
+  <li><b>One payment, one row.</b> When Alipay sends two notices for the same payment, Kachingz keeps one.</li>
+</ul>
+<p>Failed and cancelled payments are skipped, since no money left your account.</p>
+
+<h2>Back home</h2>
+<p>Every converted purchase counts towards <b>Available to spend</b> and your budgets, so you can see what the trip cost before the card statement arrives.</p>
+<div class="cta">{store_button()}</div>
+<p class="meta">More help on the <a href="{{UP}}support/">Support</a> page.</p>
+</div></section>
+"""
+
 if __name__ == "__main__":
     # site.js imports room.js; stamp its version so a changed room.js isn't served from cache.
     site_js = ROOT / "assets/site.js"
@@ -667,6 +732,12 @@ if __name__ == "__main__":
     page("budget-app-without-bank-login", "Budget App Without a Bank Login · Kachingz",
          "Budget on iPhone without linking your bank. Records stay on your iPhone, Apple Pay purchases log themselves, no ads or tracking.",
          NO_BANK_GUIDE)
+    page("daily-spending-allowance", "How Much Can I Spend a Day Until Payday? · Kachingz",
+         "Work out a daily spending allowance that lasts until payday, after bills and savings. Keep money back, plan big spends, compare with your real pace.",
+         RUNWAY_GUIDE)
+    page("alipay-expense-tracker", "Track Alipay Spending in China on iPhone · Kachingz",
+         "Log Alipay payments automatically from their notifications while travelling in China, converted from yuan to your home currency.",
+         ALIPAY_GUIDE)
     page("404", "Page not found · Kachingz", "Page not found.", NOT_FOUND)
     (ROOT / "404.html").write_text((ROOT / "404" / "index.html").read_text())
     (ROOT / "404" / "index.html").unlink()
@@ -680,7 +751,7 @@ if __name__ == "__main__":
         redirect("home/index.html", "../")
     # robots.txt and the sitemap: the pages a search engine should index, nothing else.
     pages = ["", "apple-pay-expense-tracker/", "budget-app-singapore/", "budget-app-without-bank-login/",
-             "support/", "privacy/", "terms/", "your-data/"]
+             "daily-spending-allowance/", "alipay-expense-tracker/", "support/", "privacy/", "terms/", "your-data/"]
     today = date.today().isoformat()
     (ROOT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
