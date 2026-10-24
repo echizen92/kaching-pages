@@ -664,7 +664,7 @@ NO_BANK_GUIDE = f"""
 
 # The Alipay guide describes 1.0.20 (metro as Transport, "Alipay" naming, one
 # row per payment). Publish it once that version is live.
-ALIPAY_LIVE = False
+ALIPAY_LIVE = True
 
 RUNWAY_GUIDE = f"""
 <section class="doc"><div class="wrap">
