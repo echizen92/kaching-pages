@@ -379,7 +379,7 @@ HOME = f"""
 
 # Help (the in-app chat, support.kachingz.com) ships in 1.0.21. Its privacy text
 # is built only once that version is live.
-HELP_LIVE = False
+HELP_LIVE = True
 
 HELP_SUMMARY = """
   <li>If you use Help, the messages you type are stored on our help server for 90 days after the last message and answered by DeepSeek's AI. They never include your records, and you can delete the chat in Help.</li>"""
