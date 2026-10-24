@@ -377,6 +377,23 @@ HOME = f"""
 </div></section>
 """
 
+# Help (the in-app chat, support.kachingz.com) ships in 1.0.21. Its privacy text
+# is built only once that version is live.
+HELP_LIVE = False
+
+HELP_SUMMARY = """
+  <li>If you use Help, the messages you type are stored on our help server for 90 days after the last message and answered by DeepSeek's AI. They never include your records, and you can delete the chat in Help.</li>"""
+
+HELP_ROW = """
+<tr><td>The messages you type in Help, the app version and build, your iOS version, whether you use Kachingz Pro (free, trial or paid), and an anonymous app ID. If the Kachingz team replies, your device's push notification token. Never your purchases or other records.</td>
+    <td>When you send a message in Help.</td>
+    <td>Our help server (<code>support.kachingz.com</code>), which sends your messages to DeepSeek to write a reply, or passes the chat to the Kachingz team when the help guide doesn't cover your question.</td></tr>"""
+
+HELP_SECTION = """
+<h3>Help chats</h3>
+<p>Help answers questions about the app. Your messages and the replies are stored on our help server so the chat is there when you come back, and so the Kachingz team can read a chat that's handed to them. A chat is deleted automatically 90 days after its last message. You can delete it sooner in Help: tap the <b>…</b> button, then <b>Delete chat</b>, which also deletes the push token. Replies are written by DeepSeek's language model from Kachingz's help guide. Please don't type card numbers, passwords or bank details into Help.</p>
+<p>Before Kachingz sends anything to DeepSeek, for Help or for AI reports, it asks your permission and says what is sent. You can turn this off at any time in Profile with <b>AI help and reports</b>.</p>"""
+
 PRIVACY = f"""
 <section class="doc"><div class="wrap">
 <div class="eyebrow">Kachingz</div>
@@ -386,7 +403,7 @@ PRIVACY = f"""
 <div class="summary"><b>In short</b>
 <ul>
   <li>There is no Kachingz account and no bank connection. Your records are stored on your iPhone.</li>
-  <li>When you use AI reports, a summary of the records that report needs is sent to our AI server and to DeepSeek to write it. We do not keep the content of those requests.</li>
+  <li>When you use AI reports, a summary of the records that report needs is sent to our AI server and to DeepSeek to write it. We do not keep the content of those requests.</li>{HELP_SUMMARY if HELP_LIVE else ""}
   <li>No advertising, no analytics SDKs, no tracking across apps, and we never sell data.</li>
 </ul></div>
 
@@ -403,7 +420,7 @@ PRIVACY = f"""
 <tr><th>What</th><th>When</th><th>Sent to</th></tr>
 <tr><td>A summary of the records an AI report needs: for example category and budget totals, bill and income figures, and for some reports merchant names, amounts and dates. Plus an anonymous app ID.</td>
     <td>When you generate an AI report. With Kachingz Pro, reports also refresh automatically about once a day in the background.</td>
-    <td>Our AI server (<code>ai.kachingz.com</code>), which forwards the summary to DeepSeek to write the report.</td></tr>
+    <td>Our AI server (<code>ai.kachingz.com</code>), which forwards the summary to DeepSeek to write the report.</td></tr>{HELP_ROW if HELP_LIVE else ""}
 <tr><td>Your home currency code (for example "sgd") and a date.</td>
     <td>When you log a purchase in a foreign currency, at most once a day per currency set.</td>
     <td>A free public exchange-rate service (currency-api, served by jsDelivr and Cloudflare Pages). No purchase details are sent.</td></tr>
@@ -423,6 +440,7 @@ PRIVACY = f"""
 <p>Our server does not store the content of your requests or of the AI's replies. It keeps a short technical log of each request (time, anonymous ID, whether it succeeded, size, AI tokens used and response time) and a monthly usage count per anonymous ID. The log is capped in size and older entries are deleted automatically.</p>
 <p>Until 30 September 2026, our server also logged the content of AI requests and replies, which had been enabled to study AI quality during testing. That logging was switched off and all stored request content deleted on 30 September 2026.</p>
 
+{HELP_SECTION if HELP_LIVE else ""}
 <h3>DeepSeek</h3>
 <p>AI reports are written by DeepSeek's language model. DeepSeek receives the summary described above, without your name or contact details, and processes it under its own terms and privacy policy. Its servers may be located outside Singapore, including in China.</p>
 
@@ -434,11 +452,11 @@ PRIVACY = f"""
 </ul>
 
 <h2>5. How long information is kept</h2>
-<p>Records on your device are kept until you delete them or delete the app. On our server, technical log entries are removed automatically as the size-capped log rotates, and monthly usage counts are kept only to apply the monthly limit.</p>
+<p>Records on your device are kept until you delete them or delete the app.{" Help chats are kept on our help server for 90 days after their last message, unless you delete them sooner in Help." if HELP_LIVE else ""} On our server, technical log entries are removed automatically as the size-capped log rotates, and monthly usage counts are kept only to apply the monthly limit.</p>
 
 <h2>6. Your choices</h2>
 <ul>
-  <li>You can use Kachingz without AI reports. Nothing about your records leaves your device unless you use them.</li>
+  <li>You can use Kachingz without AI reports. Nothing about your records leaves your device unless you use them.</li>{'<li>You can turn off AI help and reports in Profile, and delete your Help chat in Help.</li>' if HELP_LIVE else ""}
   <li>You can delete any purchase, or delete the app to remove all records from your iPhone.</li>
   <li>See <a href="{{UP}}your-data/">Your data</a> for step-by-step instructions and how to contact us about server-side records.</li>
 </ul>
@@ -535,6 +553,7 @@ YOUR_DATA = f"""
 </ol>
 <p>If you subscribed to Kachingz Pro, deleting the app does not cancel the subscription. Cancel it in your <a href="https://apps.apple.com/account/subscriptions">App Store subscriptions</a>.</p>
 
+{'<h2>Delete your Help chat</h2><p>In Kachingz, open Profile, then Help. Tap the <b>…</b> button, then <b>Delete chat</b>. This deletes the chat and your push token from our help server. Chats you don&#39;t delete are removed automatically 90 days after their last message.</p>' if HELP_LIVE else ""}
 <h2>What our AI server keeps</h2>
 <p>Our AI server doesn't store the content of your requests. It keeps a short technical log (time, anonymous app ID, status, size and response time) that deletes older entries automatically, and a monthly count of AI reports used. None of this is linked to your name, email or Apple Account. See the <a href="../privacy/">Privacy Policy</a> for details.</p>
 <p>The anonymous app ID is kept in your iPhone's Keychain so your monthly count survives reinstalling the app. iOS may keep Keychain items after an app is deleted; resetting your iPhone or erasing its Keychain removes it.</p>
