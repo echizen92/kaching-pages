@@ -59,12 +59,17 @@ def store_button(extra=""):
 
 def page(path, title, description, body, current="", landing=False):
     depth = path.count("/") + 1 if path else 0
-    up = "../" * depth
+    # 404.html is served at whatever address was asked for, so its links start at the root.
+    up = "/" if path == "404" else "../" * depth
     home = up or "./"
+    theatre = path.startswith("paper-theatre")
     nav = (f'<a href="{home}#day">How it works</a>'
            f'<a href="{up}privacy/"{" aria-current=page" if current == "privacy/" else ""}>Privacy</a>'
            f'<a href="{up}support/"{" aria-current=page" if current == "support/" else ""}>Support</a>'
            f'<a class="pill" href="{APP_STORE}">Get the app</a>')
+    if theatre:
+        nav = (f'<a href="{up}paper-theatre/"{" aria-current=page" if current == "paper-theatre/" else ""}>Support</a>'
+               f'<a href="{up}paper-theatre/privacy/"{" aria-current=page" if current == "paper-theatre/privacy/" else ""}>Privacy</a>')
     body = body.replace("{UP}", up)
     script = f'\n<script type="module" src="{up}assets/site.js?v={version("assets/site.js")}"></script>' if landing else ""
     preload = f'\n<link rel="preload" href="{up}assets/room/layout.json" as="fetch" crossorigin>' if landing else ""
@@ -79,16 +84,25 @@ def page(path, title, description, body, current="", landing=False):
         # Google Search Console ownership (kachingz.com, URL-prefix property). Keep it.
         seo += '\n<meta name="google-site-verification" content="rc9DhaRMvc59Jsp3yEp8k4GF0fFlVUwxNv0fcheVNrU">'
         seo += "\n" + APP_LD
-    html = f"""<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{title}</title>
-<meta name="description" content="{description}">
-<meta name="theme-color" content="#FBF3E8">
-<meta name="apple-itunes-app" content="app-id=6798360020">{seo}
-<meta property="og:type" content="website">
+    if theatre:
+        # Paper Theatre is a separate app by the same maker: its own name, no Kachingz banner or share card.
+        brand = f'<a class="brand" href="{up}paper-theatre/">Paper Theatre</a>'
+        share = f"""<meta property="og:type" content="website">
+<meta property="og:site_name" content="Paper Theatre">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{description}">"""
+        footer = f"""<footer><div class="wrap">
+  {brand}
+  <nav aria-label="Footer">
+    <a href="{up}paper-theatre/">Support</a>
+    <a href="{up}paper-theatre/privacy/">Privacy Policy</a>
+    <a href="mailto:{EMAIL}">{EMAIL}</a>
+  </nav>
+  <p class="copy">© 2026 Faiz Rashid, the maker of <a href="{home}">Kachingz</a>.</p>
+</div></footer>"""
+    else:
+        brand = f'<a class="brand" href="{home}"><img src="{up}assets/icon.png" alt="" width="34" height="34">Kachingz</a>'
+        share = f"""<meta property="og:type" content="website">
 <meta property="og:site_name" content="Kachingz">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{description}">
@@ -96,22 +110,8 @@ def page(path, title, description, body, current="", landing=False):
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Kachingz: Mochi the cat in a cosy room above the money left to spend">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="{up}assets/favicon.png">
-<link rel="apple-touch-icon" href="{up}assets/apple-touch-icon.png">
-{FONTS.replace('{up}', up)}
-<link rel="stylesheet" href="{up}assets/site.css?v={version("assets/site.css")}">{preload}{script}
-</head>
-<body class="{'landing' if landing else 'doc-page'}">
-<a class="skip" href="#main">Skip to content</a>
-<header class="top"><div class="wrap">
-  <a class="brand" href="{home}"><img src="{up}assets/icon.png" alt="" width="34" height="34">Kachingz</a>
-  <nav aria-label="Main">{nav}</nav>
-</div></header>
-<main id="main">
-{body}
-</main>
-<footer><div class="wrap">
+<meta name="twitter:card" content="summary_large_image">"""
+        footer = f"""<footer><div class="wrap">
   <a class="brand" href="{home}"><img src="{up}assets/icon.png" alt="" width="34" height="34">Kachingz</a>
   <nav aria-label="Footer">
     <a href="{up}apple-pay-expense-tracker/">Apple Pay tracking</a>
@@ -126,7 +126,33 @@ def page(path, title, description, body, current="", landing=False):
     <a href="mailto:{EMAIL}">{EMAIL}</a>
   </nav>
   <p class="copy">© 2026 Kachingz. Kachingz is not a bank and does not move money. Apple, the Apple logo, Apple Pay and Apple Wallet are trademarks of Apple Inc.</p>
-</div></footer>
+</div></footer>"""
+    itunes = "" if theatre else '<meta name="apple-itunes-app" content="app-id=6798360020">'
+    seo = seo.lstrip("\n") if theatre else seo
+    icons = "" if theatre else f'<link rel="icon" href="{up}assets/favicon.png">\n<link rel="apple-touch-icon" href="{up}assets/apple-touch-icon.png">\n'
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title}</title>
+<meta name="description" content="{description}">
+<meta name="theme-color" content="#FBF3E8">
+{itunes}{seo}
+{share}
+{icons}{FONTS.replace('{up}', up)}
+<link rel="stylesheet" href="{up}assets/site.css?v={version("assets/site.css")}">{preload}{script}
+</head>
+<body class="{'landing' if landing else 'doc-page'}">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+  {brand}
+  <nav aria-label="Main">{nav}</nav>
+</div></header>
+<main id="main">
+{body}
+</main>
+{footer}
 </body>
 </html>
 """
@@ -571,6 +597,13 @@ NOT_FOUND = """
 <h1>Page not found</h1>
 <p>That page doesn't exist. Try the <a href="/">home page</a>, <a href="/privacy/">Privacy Policy</a> or <a href="/support/">Support</a>.</p>
 </div></section>
+<script>
+// Old addresses with no page of their own. support.html can't be a file: GitHub Pages
+// serves support.html for /support/ too, so a redirect file there sent /support/ to
+// /support/support/.
+const moved = {"/support.html": "/support/"};
+if (moved[location.pathname]) location.replace(moved[location.pathname] + location.hash);
+</script>
 """
 
 
@@ -729,6 +762,62 @@ ALIPAY_GUIDE = f"""
 </div></section>
 """
 
+# ---------------------------------------------------------------------------
+# Paper Theatre, a pop-up storybook app by the same maker. Its App Store support
+# and privacy URLs are /paper-theatre/ and /paper-theatre/privacy/.
+THEATRE_UPDATED = "5 November 2026"
+
+THEATRE_SUPPORT = f"""
+<section class="doc faq"><div class="wrap">
+<div class="eyebrow">Paper Theatre</div>
+<h1>Support</h1>
+<p class="lede">Pop-up fairy tales that unfold in your hands. Open your iPhone and the story stands up: castles, beanstalks and lanterns rise out of the fold, and the pieces swing, glow and move as you read.</p>
+<p>Jack and the Beanstalk is free. The Night Post is an original story, available to buy, and more classic fairy tales are on the way.</p>
+<p class="meta">Email <a href="mailto:{EMAIL}">{EMAIL}</a> and we'll get back to you.</p>
+
+<h2>Help</h2>
+<details><summary>How do I turn the page?</summary>
+<p>Swipe the lower page, or tap the curled corner. On a foldable iPhone you can also fold the book partway and flick.</p></details>
+<details><summary>How do I restore my purchases?</summary>
+<p>Go to the library, open <b>Settings</b> (a grown-up answers the parental gate) and tap <b>Restore purchases</b>.</p></details>
+<details><summary>Can my family share the stories I buy?</summary>
+<p>Yes. Stories you buy are shared with your Family Sharing group automatically.</p></details>
+
+<h2>Privacy</h2>
+<p>Paper Theatre collects nothing about you or your child. See the <a href="{{UP}}paper-theatre/privacy/">Privacy Policy</a>.</p>
+</div></section>
+"""
+
+THEATRE_PRIVACY = f"""
+<section class="doc"><div class="wrap">
+<div class="eyebrow">Paper Theatre</div>
+<h1>Privacy Policy</h1>
+<p class="meta">Last updated {THEATRE_UPDATED}</p>
+
+<p>Paper Theatre is a pop-up storybook app for children and the grown-ups who read with them. It is published by Faiz Rashid in Singapore, the maker of Kachingz.</p>
+
+<h2>What we collect</h2>
+<p>Nothing. Paper Theatre does not collect, store or share any personal information. It has no accounts, no sign-in, no advertising, no analytics and no tracking, and it sends nothing about you or your child to us or to anyone else.</p>
+
+<h2>Purchases</h2>
+<p>Stories are bought through Apple's App Store. Apple handles the payment, and we never see your name, payment details or Apple ID. The app checks with Apple which stories your family owns so it can unlock them. Purchases are shared through Family Sharing if you use it.</p>
+<p>A parental gate appears before any purchase, and before any link that leads out of the app.</p>
+
+<h2>Downloads</h2>
+<p>Some stories download their pictures and sounds after you buy them. These files come from Apple's servers through the App Store, and no information about you is sent with them.</p>
+
+<h2>Children</h2>
+<p>Paper Theatre is designed for children and follows the App Store's Kids Category rules. Because it collects no data, it collects no data from children.</p>
+
+<h2>Changes</h2>
+<p>If this policy ever changes, we will update this page and the date at the top.</p>
+
+<h2>Contact</h2>
+<p>Questions? Email us at <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>
+</div></section>
+"""
+
+
 if __name__ == "__main__":
     # site.js imports room.js; stamp its version so a changed room.js isn't served from cache.
     site_js = ROOT / "assets/site.js"
@@ -765,12 +854,20 @@ if __name__ == "__main__":
       page("alipay-expense-tracker", "Track Alipay Spending in China on iPhone · Kachingz",
          "Log Alipay payments automatically from their notifications while travelling in China, converted from yuan to your home currency.",
          ALIPAY_GUIDE)
+    page("paper-theatre", "Support · Paper Theatre",
+         "Help with Paper Theatre, pop-up fairy tales for iPhone: turning pages, restoring purchases and Family Sharing.",
+         THEATRE_SUPPORT, "paper-theatre/")
+    page("paper-theatre/privacy", "Privacy Policy · Paper Theatre",
+         "Paper Theatre collects no personal information: no accounts, no ads, no analytics and no tracking.",
+         THEATRE_PRIVACY, "paper-theatre/privacy/")
     page("404", "Page not found · Kachingz", "Page not found.", NOT_FOUND)
     (ROOT / "404.html").write_text((ROOT / "404" / "index.html").read_text())
     (ROOT / "404" / "index.html").unlink()
     (ROOT / "404").rmdir()
     # Old addresses: App Store Connect and installed apps link to these.
-    redirect("support.html", "support/")
+    # /support.html is not written: GitHub Pages would serve it for /support/ as well,
+    # so it is redirected from 404.html instead.
+    (ROOT / "support.html").unlink(missing_ok=True)
     redirect("marketing.html", "./" if LANDING_AT_ROOT else "home/")
     if LANDING_AT_ROOT:
         # /home/ was the landing page's address before it moved to the front.
@@ -778,7 +875,8 @@ if __name__ == "__main__":
         redirect("home/index.html", "../")
     # robots.txt and the sitemap: the pages a search engine should index, nothing else.
     pages = ["", "apple-pay-expense-tracker/", "budget-app-singapore/", "budget-app-without-bank-login/",
-             "daily-spending-allowance/"] + (["alipay-expense-tracker/"] if ALIPAY_LIVE else []) + ["support/", "privacy/", "terms/", "your-data/"]
+             "daily-spending-allowance/"] + (["alipay-expense-tracker/"] if ALIPAY_LIVE else []) + ["support/", "privacy/", "terms/", "your-data/",
+             "paper-theatre/", "paper-theatre/privacy/"]
     today = date.today().isoformat()
     (ROOT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'

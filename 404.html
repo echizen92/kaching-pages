@@ -17,17 +17,17 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Kachingz: Mochi the cat in a cosy room above the money left to spend">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="../assets/favicon.png">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-<link rel="preload" href="../assets/fonts/fraunces-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../assets/fonts/instrument-sans-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../assets/site.css?v=fe2bebc3">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preload" href="/assets/fonts/fraunces-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/instrument-sans-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css?v=fe2bebc3">
 </head>
 <body class="doc-page">
 <a class="skip" href="#main">Skip to content</a>
 <header class="top"><div class="wrap">
-  <a class="brand" href="../"><img src="../assets/icon.png" alt="" width="34" height="34">Kachingz</a>
-  <nav aria-label="Main"><a href="../#day">How it works</a><a href="../privacy/">Privacy</a><a href="../support/">Support</a><a class="pill" href="https://apps.apple.com/app/id6798360020">Get the app</a></nav>
+  <a class="brand" href="/"><img src="/assets/icon.png" alt="" width="34" height="34">Kachingz</a>
+  <nav aria-label="Main"><a href="/#day">How it works</a><a href="/privacy/">Privacy</a><a href="/support/">Support</a><a class="pill" href="https://apps.apple.com/app/id6798360020">Get the app</a></nav>
 </div></header>
 <main id="main">
 
@@ -35,20 +35,27 @@
 <h1>Page not found</h1>
 <p>That page doesn't exist. Try the <a href="/">home page</a>, <a href="/privacy/">Privacy Policy</a> or <a href="/support/">Support</a>.</p>
 </div></section>
+<script>
+// Old addresses with no page of their own. support.html can't be a file: GitHub Pages
+// serves support.html for /support/ too, so a redirect file there sent /support/ to
+// /support/support/.
+const moved = {"/support.html": "/support/"};
+if (moved[location.pathname]) location.replace(moved[location.pathname] + location.hash);
+</script>
 
 </main>
 <footer><div class="wrap">
-  <a class="brand" href="../"><img src="../assets/icon.png" alt="" width="34" height="34">Kachingz</a>
+  <a class="brand" href="/"><img src="/assets/icon.png" alt="" width="34" height="34">Kachingz</a>
   <nav aria-label="Footer">
-    <a href="../apple-pay-expense-tracker/">Apple Pay tracking</a>
-    <a href="../budget-app-singapore/">For Singapore</a>
-    <a href="../budget-app-without-bank-login/">No bank login</a>
-    <a href="../daily-spending-allowance/">Spend a day until payday</a>
-    <a href="../alipay-expense-tracker/">Alipay in China</a>
-    <a href="../privacy/">Privacy Policy</a>
-    <a href="../terms/">Terms of Use</a>
-    <a href="../support/">Support</a>
-    <a href="../your-data/">Your data</a>
+    <a href="/apple-pay-expense-tracker/">Apple Pay tracking</a>
+    <a href="/budget-app-singapore/">For Singapore</a>
+    <a href="/budget-app-without-bank-login/">No bank login</a>
+    <a href="/daily-spending-allowance/">Spend a day until payday</a>
+    <a href="/alipay-expense-tracker/">Alipay in China</a>
+    <a href="/privacy/">Privacy Policy</a>
+    <a href="/terms/">Terms of Use</a>
+    <a href="/support/">Support</a>
+    <a href="/your-data/">Your data</a>
     <a href="mailto:faiz.rashid@gmx.us">faiz.rashid@gmx.us</a>
   </nav>
   <p class="copy">© 2026 Kachingz. Kachingz is not a bank and does not move money. Apple, the Apple logo, Apple Pay and Apple Wallet are trademarks of Apple Inc.</p>
