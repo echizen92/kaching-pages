@@ -765,7 +765,7 @@ ALIPAY_GUIDE = f"""
 # ---------------------------------------------------------------------------
 # Paper Theatre, a pop-up storybook app by the same maker. Its App Store support
 # and privacy URLs are /paper-theatre/ and /paper-theatre/privacy/.
-THEATRE_UPDATED = "5 November 2026"
+THEATRE_UPDATED = "13 November 2026"
 
 THEATRE_SUPPORT = f"""
 <section class="doc faq"><div class="wrap">
@@ -797,14 +797,15 @@ THEATRE_PRIVACY = f"""
 <p>Paper Theatre is a pop-up storybook app for children and the grown-ups who read with them. It is published by Faiz Rashid in Singapore, the maker of Kachingz.</p>
 
 <h2>What we collect</h2>
-<p>Nothing. Paper Theatre does not collect, store or share any personal information. It has no accounts, no sign-in, no advertising, no analytics and no tracking, and it sends nothing about you or your child to us or to anyone else.</p>
+<p>Nothing. Paper Theatre does not collect or share any personal information. It has no accounts, no sign-in, no advertising, no analytics and no tracking, and it sends nothing about you or your child to us or to anyone else.</p>
+<p>The app saves a few settings on the device only: the narrator voice, your place in each book, and the screen layout. Nothing leaves the device, and deleting the app removes them.</p>
 
 <h2>Purchases</h2>
 <p>Stories are bought through Apple's App Store. Apple handles the payment, and we never see your name, payment details or Apple ID. The app checks with Apple which stories your family owns so it can unlock them. Purchases are shared through Family Sharing if you use it.</p>
 <p>A parental gate appears before any purchase, and before any link that leads out of the app.</p>
 
 <h2>Downloads</h2>
-<p>Some stories download their pictures and sounds after you buy them. These files come from Apple's servers through the App Store, and no information about you is sent with them.</p>
+<p>Jack and the Beanstalk is built into the app. The pictures and sounds for the other six stories are downloaded from Apple's servers through the App Store. Apple handles these downloads, and the app sends nothing about you or your child to us with them.</p>
 
 <h2>Children</h2>
 <p>Paper Theatre is designed for children and follows the App Store's Kids Category rules. Because it collects no data, it collects no data from children.</p>
