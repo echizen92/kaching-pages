@@ -772,7 +772,7 @@ ALIPAY_GUIDE = f"""
 # ---------------------------------------------------------------------------
 # Paper Theatre, a pop-up storybook app by the same maker. Its App Store support
 # and privacy URLs are /paper-theatre/ and /paper-theatre/privacy/.
-THEATRE_UPDATED = "13 November 2026"
+THEATRE_UPDATED = "16 November 2026"
 
 THEATRE_SUPPORT = f"""
 <section class="doc faq"><div class="wrap">
@@ -813,6 +813,10 @@ THEATRE_PRIVACY = f"""
 
 <h2>Downloads</h2>
 <p>Jack and the Beanstalk is built into the app. The pictures and sounds for the other six stories are downloaded from Apple's servers through the App Store. Apple handles these downloads, and the app sends nothing about you or your child to us with them.</p>
+
+<h2>Paint Box</h2>
+<p>Paint Box is the colouring add-on, bought through the App Store like the stories. Coloured pages are saved on the device only. Nothing is collected or sent, and deleting the app removes them.</p>
+<p>The Save to Photos button sits behind the parental gate. It asks only for permission to add pictures to Photos, so the app can save a coloured page but cannot see or read anything already in your library.</p>
 
 <h2>Children</h2>
 <p>Paper Theatre is designed for children and follows the App Store's Kids Category rules. Because it collects no data, it collects no data from children.</p>
