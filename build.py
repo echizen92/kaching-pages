@@ -15,6 +15,7 @@ ROOT = pathlib.Path(__file__).parent
 APP_STORE = "https://apps.apple.com/app/id6798360020"
 EMAIL = "faiz.rashid@gmx.us"
 UPDATED = "30 September 2026"
+PRIVACY_UPDATED = "16 November 2026"
 SITE = "https://kachingz.com/"
 # What a search result and a shared link say about the app itself.
 APP_LD = """<script type="application/ld+json">
@@ -424,12 +425,12 @@ PRIVACY = f"""
 <section class="doc"><div class="wrap">
 <div class="eyebrow">Kachingz</div>
 <h1>Privacy Policy</h1>
-<p class="meta">Last updated {UPDATED}</p>
+<p class="meta">Last updated {PRIVACY_UPDATED}</p>
 
 <div class="summary"><b>In short</b>
 <ul>
   <li>There is no Kachingz account and no bank connection. Your records are stored on your iPhone.</li>
-  <li>When you use AI reports, a summary of the records that report needs is sent to our AI server and to DeepSeek to write it. We do not keep the content of those requests.</li>{HELP_SUMMARY if HELP_LIVE else ""}
+  <li>When you use AI reports or ask the coach a question, a summary of the records it needs is written by Apple's models (on your iPhone, or Apple's Private Cloud Compute) or, with your permission, sent to our AI server and to DeepSeek. We do not keep the content of those requests.</li>{HELP_SUMMARY if HELP_LIVE else ""}
   <li>No advertising, no analytics SDKs, no tracking across apps, and we never sell data.</li>
 </ul></div>
 
@@ -444,9 +445,15 @@ PRIVACY = f"""
 <h2>3. Information that leaves your device</h2>
 <table>
 <tr><th>What</th><th>When</th><th>Sent to</th></tr>
-<tr><td>A summary of the records an AI report needs: for example category and budget totals, bill and income figures, and for some reports merchant names, amounts and dates. Plus an anonymous app ID.</td>
-    <td>When you generate an AI report. With Kachingz Pro, reports also refresh automatically about once a day in the background.</td>
-    <td>Our AI server (<code>ai.kachingz.com</code>), which forwards the summary to DeepSeek to write the report.</td></tr>{HELP_ROW if HELP_LIVE else ""}
+<tr><td>A summary of the records an AI report needs: for example category and budget totals, bill and income figures, and for some reports merchant names, amounts and dates. When you ask the coach a question with Kachingz Pro, also the AI reports it reads and your recent messages in Ask. Plus an anonymous app ID.</td>
+    <td>When you generate an AI report or ask the coach a question it can't work out on your iPhone. With Kachingz Pro, reports also refresh automatically about once a day in the background.</td>
+    <td>With your permission ("AI help and reports"): our AI server (<code>ai.kachingz.com</code>), which forwards the summary to DeepSeek. Otherwise, or if DeepSeek can't answer: Apple's Private Cloud Compute (iOS 27), where Apple processes it privately and doesn't store it, or Apple's model on your iPhone, where nothing leaves the device. Free users on iPhones with Apple Intelligence use Apple's models first.</td></tr>{HELP_ROW if HELP_LIVE else ""}
+<tr><td>The coin names or token contract addresses of crypto accounts you add, and the currency to price them in. Never how much you hold.</td>
+    <td>When you open Accounts or edit a crypto account, at most every 5 minutes.</td>
+    <td>CoinGecko (<code>api.coingecko.com</code>), a public crypto price service, to look up current prices.</td></tr>
+<tr><td>The tickers of stock or ETF investment accounts you add (for example "SPY"), or a name you search for, with an anonymous app ID. Never how many units you hold or what they're worth.</td>
+    <td>When you open Accounts or edit an investment account, at most every 15 minutes.</td>
+    <td>Our server (<code>ai.kachingz.com</code>), which looks up prices from Twelve Data, a market data service, and keeps the latest price to share with everyone holding that ticker.</td></tr>
 <tr><td>Your home currency code (for example "sgd") and a date.</td>
     <td>When you log a purchase in a foreign currency, at most once a day per currency set.</td>
     <td>A free public exchange-rate service (currency-api, served by jsDelivr and Cloudflare Pages). No purchase details are sent.</td></tr>
