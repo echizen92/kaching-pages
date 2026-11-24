@@ -63,14 +63,17 @@ def page(path, title, description, body, current="", landing=False):
     # 404.html is served at whatever address was asked for, so its links start at the root.
     up = "/" if path == "404" else "../" * depth
     home = up or "./"
-    theatre = path.startswith("paper-theatre")
+    # Other apps by the same maker live in their own folders with their own
+    # name, header and footer: (folder, name, [(label, page), ...]).
+    sub = next((a for a in SUB_APPS if path == a[0] or path.startswith(a[0] + "/")), None)
+    theatre = sub is not None
     nav = (f'<a href="{home}#day">How it works</a>'
            f'<a href="{up}privacy/"{" aria-current=page" if current == "privacy/" else ""}>Privacy</a>'
            f'<a href="{up}support/"{" aria-current=page" if current == "support/" else ""}>Support</a>'
            f'<a class="pill" href="{APP_STORE}">Get the app</a>')
     if theatre:
-        nav = (f'<a href="{up}paper-theatre/"{" aria-current=page" if current == "paper-theatre/" else ""}>Support</a>'
-               f'<a href="{up}paper-theatre/privacy/"{" aria-current=page" if current == "paper-theatre/privacy/" else ""}>Privacy</a>')
+        nav = "".join(f'<a href="{up}{link}"{" aria-current=page" if current == link else ""}>{label}</a>'
+                      for label, link in sub[2])
     body = body.replace("{UP}", up)
     script = f'\n<script type="module" src="{up}assets/site.js?v={version("assets/site.js")}"></script>' if landing else ""
     preload = f'\n<link rel="preload" href="{up}assets/room/layout.json" as="fetch" crossorigin>' if landing else ""
@@ -87,17 +90,15 @@ def page(path, title, description, body, current="", landing=False):
         seo += "\n" + APP_LD
     if theatre:
         # Paper Theatre is a separate app by the same maker: its own name, no Kachingz banner or share card.
-        brand = f'<a class="brand" href="{up}paper-theatre/">Paper Theatre</a>'
+        brand = f'<a class="brand" href="{up}{sub[0]}/">{sub[1]}</a>'
         share = f"""<meta property="og:type" content="website">
-<meta property="og:site_name" content="Paper Theatre">
+<meta property="og:site_name" content="{sub[1]}">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{description}">"""
         footer = f"""<footer><div class="wrap">
   {brand}
   <nav aria-label="Footer">
-    <a href="{up}paper-theatre/">Support</a>
-    <a href="{up}paper-theatre/privacy/">Privacy Policy</a>
-    <a href="mailto:{EMAIL}">{EMAIL}</a>
+    {"".join(f'<a href="{up}{link}">{label}</a>' + chr(10) + "    " for label, link in sub[3])}<a href="mailto:{EMAIL}">{EMAIL}</a>
   </nav>
   <p class="copy">© 2026 Faiz Rashid, the maker of <a href="{home}">Kachingz</a>.</p>
 </div></footer>"""
@@ -769,6 +770,16 @@ ALIPAY_GUIDE = f"""
 </div></section>
 """
 
+# Apps by the same maker with their own folder: (folder, name, header links, footer links).
+SUB_APPS = [
+    ("paper-theatre", "Paper Theatre",
+     [("Support", "paper-theatre/"), ("Privacy", "paper-theatre/privacy/")],
+     [("Support", "paper-theatre/"), ("Privacy Policy", "paper-theatre/privacy/")]),
+    ("folio", "Folio",
+     [("Support", "folio/"), ("Privacy", "folio/privacy/"), ("Terms", "folio/terms/")],
+     [("Support", "folio/"), ("Privacy Policy", "folio/privacy/"), ("Terms of Use", "folio/terms/")]),
+]
+
 # ---------------------------------------------------------------------------
 # Paper Theatre, a pop-up storybook app by the same maker. Its App Store support
 # and privacy URLs are /paper-theatre/ and /paper-theatre/privacy/.
@@ -829,6 +840,137 @@ THEATRE_PRIVACY = f"""
 </div></section>
 """
 
+# ---------------------------------------------------------------------------
+# Folio: Leather Day Planner, a planner app by the same maker. Its App Store
+# support, marketing, privacy and terms URLs are /folio/, /folio/privacy/ and
+# /folio/terms/. The source of these texts is kept with the app, in the
+# Daymark repo's site/ folder; change both together.
+FOLIO_UPDATED = "24 November 2026"
+FOLIO_EULA = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+
+FOLIO_SUPPORT = f"""
+<section class="doc faq"><div class="wrap">
+<div class="eyebrow">Folio</div>
+<h1>Support</h1>
+<p class="lede">Folio is a day planner for iPhone, bound in leather. Your calendar, tasks, notes and habits sit together on paper pages, and everything you write stays on your iPhone.</p>
+<p>Folio is free to use. Folio Complete, a yearly subscription or a one-time lifetime purchase, adds more leathers, Ask Folio, handwriting, the Private pocket, desk and tent modes on iPhone Duo, the focus timer, widgets and export.</p>
+<p class="meta">Email <a href="mailto:{EMAIL}">{EMAIL}</a> and we'll get back to you. Say which iPhone and iOS version you have, and what you tapped. A screenshot helps.</p>
+
+<h2>Help</h2>
+<details><summary>Do I need an account?</summary>
+<p>No. Folio has no accounts and nothing to sign in to. Your planner is kept on your iPhone.</p></details>
+<details><summary>How do I back up my planner?</summary>
+<p>On the Today page, tap <b>Cover and settings</b> at the foot of the page, then use the backup section. Folio also keeps its own recent backups on your iPhone. To keep a copy somewhere else, share a backup to Files or another place you trust, and restore it from there.</p></details>
+<details><summary>How do I move to a new iPhone?</summary>
+<p>On the new iPhone, choose <b>Moving from another iPhone?</b> on the cover when Folio first opens. On the old iPhone, open <b>Cover and settings</b> and choose <b>Move to a New iPhone</b>, then scan the code it shows with the new iPhone. The planner goes straight across between the two phones, over an encrypted connection. Keep both phones close together.</p></details>
+<details><summary>How do I restore my purchases?</summary>
+<p>Open <b>Cover and settings</b> and tap <b>Folio Complete</b> at the top, then <b>Restore Purchases</b>. Use the same Apple Account you bought with.</p></details>
+<details><summary>How do I cancel the yearly plan?</summary>
+<p>In the iPhone's Settings app, tap your name, then <b>Subscriptions</b>, then Folio Complete. You can also go to <a href="https://apps.apple.com/account/subscriptions">your App Store subscriptions</a>. Cancel at least 24 hours before the renewal date to avoid the next charge. Everything you made stays in your planner.</p></details>
+<details><summary>Why does Ask Folio say "No answer"?</summary>
+<p>Ask Folio uses Apple Intelligence, so it needs an iPhone that supports Apple Intelligence, with Apple Intelligence turned on in Settings. Without it, Folio still searches your planner for the words you typed.</p></details>
+<details><summary>How do I use desk and tent modes?</summary>
+<p>They are for iPhone Duo. Half-fold it with the hinge across and rest it on a table for desk mode: the lower half shows your focus timer and today's tasks. Stand it up like a tent so the cover display faces you for a tear-off daily calendar. Every other part of Folio works the same on any iPhone.</p></details>
+<details><summary>I can't open my locked notes or Private pocket.</summary>
+<p>They open with Face ID, Touch ID or your iPhone's passcode. If Folio asks for your recovery words (for example after the iPhone's passcode was turned off, or after restoring onto another iPhone), enter the words you wrote down when you set them up. Without the recovery words, locked notes and pocket cards cannot be opened by anyone, including us.</p></details>
+<details><summary>The weather doesn't show.</summary>
+<p>Tap <b>Show the weather</b> on the Today page and allow location while using Folio. You can change this later in the iPhone's Settings app, under Privacy &amp; Security, Location Services.</p></details>
+
+<h2>Privacy</h2>
+<p>Folio has no accounts, ads, analytics or tracking, and we never receive your planner. See the <a href="{{UP}}folio/privacy/">Privacy Policy</a> and the <a href="{{UP}}folio/terms/">Terms of Use</a>.</p>
+</div></section>
+"""
+
+FOLIO_PRIVACY = f"""
+<section class="doc"><div class="wrap">
+<div class="eyebrow">Folio</div>
+<h1>Privacy Policy</h1>
+<p class="meta">Last updated {FOLIO_UPDATED}. Effective from that date.</p>
+
+<p>Folio: Leather Day Planner is a planner app for iPhone. It is published by Faiz Rashid in Singapore, the maker of Kachingz. This policy says what happens to the things you put in Folio.</p>
+
+<h2>In short</h2>
+<p>We do not collect your data. Folio has no accounts, no sign-in, no advertising, no analytics, no crash reporting and no tracking, and it contains no other companies' code. We have no server that receives your planner. Your planner is kept on your iPhone. A few features send specific information to Apple, or to a website or service you choose, only to do what you asked; each one is listed below.</p>
+
+<h2>What stays on your iPhone</h2>
+<ul>
+  <li><b>Your planner:</b> tasks, notes, habits, scraps, events and time blocks you create, handwriting, focus sessions, your Private pocket and your settings are stored in a database on your iPhone. Folio does not sync it through iCloud or anywhere else.</li>
+  <li><b>Calendars and reminders:</b> Folio shows the events in your iPhone's calendars and adds the events you create there. Those calendars sync the way you have set them up on your iPhone; Folio sends them nowhere. Reminders are read once, only when you choose Import from Reminders.</li>
+  <li><b>Health:</b> when you link a habit to steps, workouts, mindful minutes or sleep, Folio reads that from Apple Health on your iPhone. It never writes to Health and sends Health data nowhere.</li>
+  <li><b>Your voice:</b> when you hold to speak, speech is turned into text on your iPhone. The recording is kept only if you turn on Keep recordings of voice scraps. Voice messages and videos shared to Folio are written down on your iPhone too.</li>
+  <li><b>Photos, screenshots, documents and handwriting:</b> the text in them is read on your iPhone. Photos are chosen with the system photo picker, so Folio sees only the ones you pick.</li>
+  <li><b>Search:</b> Folio's search index is on your iPhone. Entries also appear in the iPhone's own search; a locked note appears there by its title only.</li>
+  <li><b>Widgets, Live Activities and reminders</b> are made on your iPhone. Folio uses no push notifications.</li>
+</ul>
+
+<h2>What is sent to Apple, and when</h2>
+<ul>
+  <li><b>Reading scraps and Ask Folio (Apple Intelligence).</b> Folio reads your scraps (the things you capture or share into it) to suggest tasks, events and notes, and answers questions you ask from your own entries. This uses Apple's model on your iPhone. When a scrap or a question with the entries it needs is too long for it, Folio sends that text to Apple's Private Cloud Compute, which, as Apple describes it, uses your data only to answer the request, does not keep it, and does not make it available to Apple. We never see it. This happens on iPhones that support Apple Intelligence, without a separate switch in Folio; with Apple Intelligence turned off, Folio reads scraps with its own rules on your iPhone instead.</li>
+  <li><b>Weather (WeatherKit).</b> Only after you tap Show the weather and allow location, Folio sends your location to Apple's weather service to get the forecast, and refreshes it about once an hour while it is shown. It sends the location you allowed: precise, or approximate if you turn off Precise Location for Folio in the iPhone's Settings.</li>
+  <li><b>Places and travel times (Apple Maps).</b> When you look up a place for an event, the words you type are sent to Apple Maps to find it, with the area around your last known location if you have allowed location. When an event or suggestion has a place and you have allowed location, Folio asks Apple Maps how long the trip from where you are will take.</li>
+  <li><b>Apple Music.</b> If you allow it, the desk page shows what is playing in the Music app; the album artwork is loaded from Apple.</li>
+  <li><b>Language and speech files.</b> iOS may download Apple's language or speech recognition files that Folio needs. Nothing about you is sent with them.</li>
+  <li><b>Purchases.</b> Folio Complete is bought through the App Store. Apple handles the payment; we never see your name, payment details or Apple Account. Folio asks Apple which purchases your Apple Account has, to unlock them.</li>
+</ul>
+<p>Apple's handling of this information is described in <a href="https://www.apple.com/legal/privacy/">Apple's Privacy Policy</a>.</p>
+
+<h2>What is sent to websites</h2>
+<p><b>Link titles.</b> When you save a link as a scrap, Folio visits that page to show its title and picture. The website sees an ordinary visit from your iPhone, including its internet address, as it would from a browser. This is on unless you turn off <b>Fetch titles for links</b> in Scraps settings; then Folio keeps the link without visiting it. Links you open from Folio open in your browser.</p>
+
+<h2>Your own AI service (optional, off unless you set it up)</h2>
+<p>In Scraps settings, <b>Your Own Model</b> lets you have scraps read by an AI service you choose, using your own account and key. It is off until you turn it on, and before anything is sent Folio shows which server will receive it and asks you to agree. When it is on, Folio sends that server the scrap's text, where it came from, and any link in it, for every scrap or only long ones, as you choose. Pictures are never sent. That service's own privacy policy then applies. Your key is kept in this iPhone's Keychain and is not synced. This setting is never used for Ask Folio or the Private pocket.</p>
+
+<h2>Locked notes and the Private pocket</h2>
+<p>Locked notes and the cards in your Private pocket are encrypted on your iPhone. The key that opens them is kept in this iPhone's Keychain and needs Face ID, Touch ID or your passcode. If you set up recovery words, they can open them too; Folio never stores the words. So that locked notes in a backup can be opened on your other iPhones, Folio keeps the backup key in your iCloud Keychain when iCloud Keychain is on (Apple encrypts it end to end), and otherwise only on this iPhone.</p>
+
+<h2>Backups and moving to a new iPhone</h2>
+<p>Folio keeps its last seven automatic backups on your iPhone. A backup you share or save goes only where you put it. In a backup file, locked notes and pocket cards stay encrypted, but the rest of your planner is readable by anyone who has the file, so keep backup files somewhere you trust.</p>
+<p>Moving to a new iPhone sends your planner directly between your two iPhones nearby, over an encrypted connection, sealed with a key from the code you scan. It does not go through the internet or through us. The new iPhone sees the old one's device name while they connect.</p>
+
+<h2>Siri and Shortcuts</h2>
+<p>When you use Folio's actions in Siri or Shortcuts, such as reading your agenda or open tasks, Folio hands the answer to Siri or Shortcuts on your iPhone, which handle it as Apple describes.</p>
+
+<h2>Deleting your data</h2>
+<p>Delete any entry in Folio and it is gone from your planner. To delete everything, delete Folio from your iPhone: that removes the planner and its automatic backups. Backup files you saved elsewhere stay where you put them, and events you added to your calendars stay in your calendars; delete them there. After moving to a new iPhone, the old iPhone offers <b>Erase from this iPhone</b>. Because we hold none of your data, there is nothing of yours on any server of ours to delete.</p>
+
+<h2>Children</h2>
+<p>Folio is a general planner and is not directed at children under 13. It collects no personal information from anyone, including children.</p>
+
+<h2>Changes</h2>
+<p>If this policy changes, we will update this page and the date at the top.</p>
+
+<h2>Contact</h2>
+<p>Questions? Email us at <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>
+</div></section>
+"""
+
+FOLIO_TERMS = f"""
+<section class="doc"><div class="wrap">
+<div class="eyebrow">Folio</div>
+<h1>Terms of Use</h1>
+<p class="meta">Last updated {FOLIO_UPDATED}</p>
+
+<p>Folio: Leather Day Planner is licensed to you under Apple's <a href="{FOLIO_EULA}">Standard Licensed Application End User License Agreement</a>. These notes add a few things specific to Folio.</p>
+
+<h2>Folio Complete</h2>
+<p>Folio is free to use. Folio Complete is optional and is offered two ways:</p>
+<ul>
+  <li><b>Yearly:</b> an auto-renewing subscription for one year at a time, with a free first week for new subscribers. Payment is charged to your Apple Account when the free week ends, or when you confirm the purchase if there is no free week. The subscription renews automatically unless it is cancelled at least 24 hours before the end of the current year, and the renewal is charged within the 24 hours before that. You can manage or cancel it in your <a href="https://apps.apple.com/account/subscriptions">App Store account settings</a>.</li>
+  <li><b>Lifetime:</b> a single purchase, with no renewals.</li>
+</ul>
+<p>Prices are shown in the app and on the App Store before you buy, in your local currency. Refunds are handled by Apple. If Folio Complete ends, everything you made stays in your planner.</p>
+
+<h2>Suggestions and answers</h2>
+<p>Scrap suggestions and Ask Folio answers are written automatically from your own entries and can be wrong. Check anything important, such as dates, times and amounts, before you rely on it.</p>
+
+<h2>Your planner</h2>
+<p>Your planner is kept on your iPhone, and we cannot recover it for you. Keep a backup somewhere you trust, and write down your recovery words if you lock notes or use the Private pocket.</p>
+
+<h2>Contact</h2>
+<p><a href="mailto:{EMAIL}">{EMAIL}</a></p>
+</div></section>
+"""
+
 
 if __name__ == "__main__":
     # site.js imports room.js; stamp its version so a changed room.js isn't served from cache.
@@ -872,6 +1014,15 @@ if __name__ == "__main__":
     page("paper-theatre/privacy", "Privacy Policy · Paper Theatre",
          "Paper Theatre collects no personal information: no accounts, no ads, no analytics and no tracking.",
          THEATRE_PRIVACY, "paper-theatre/privacy/")
+    page("folio", "Support · Folio: Leather Day Planner",
+         "Help with Folio, the leather day planner for iPhone: backups, moving to a new iPhone, purchases, Ask Folio and iPhone Duo.",
+         FOLIO_SUPPORT, "folio/")
+    page("folio/privacy", "Privacy Policy · Folio",
+         "Folio keeps your planner on your iPhone: no accounts, ads, analytics or tracking. What is sent to Apple or a service you choose, and when.",
+         FOLIO_PRIVACY, "folio/privacy/")
+    page("folio/terms", "Terms of Use · Folio",
+         "Terms of use for Folio: Leather Day Planner and Folio Complete.",
+         FOLIO_TERMS, "folio/terms/")
     page("404", "Page not found · Kachingz", "Page not found.", NOT_FOUND)
     (ROOT / "404.html").write_text((ROOT / "404" / "index.html").read_text())
     (ROOT / "404" / "index.html").unlink()
@@ -888,7 +1039,8 @@ if __name__ == "__main__":
     # robots.txt and the sitemap: the pages a search engine should index, nothing else.
     pages = ["", "apple-pay-expense-tracker/", "budget-app-singapore/", "budget-app-without-bank-login/",
              "daily-spending-allowance/"] + (["alipay-expense-tracker/"] if ALIPAY_LIVE else []) + ["support/", "privacy/", "terms/", "your-data/",
-             "paper-theatre/", "paper-theatre/privacy/"]
+             "paper-theatre/", "paper-theatre/privacy/",
+             "folio/", "folio/privacy/", "folio/terms/"]
     today = date.today().isoformat()
     (ROOT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
